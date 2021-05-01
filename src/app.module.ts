@@ -7,6 +7,7 @@ import { GraphQLError, GraphQLFormattedError } from 'graphql';
 
 import { GraphQLModule } from '@nestjs/graphql';
 import { MongooseModule } from '@nestjs/mongoose';
+import { APP_FILTER } from '@nestjs/core';
 import { AppConfigModule } from './config/config.module';
 import { AppConfigService } from './config/config.service';
 import { PlaceModule } from './place/place.module';
@@ -16,6 +17,7 @@ import { CourseModule } from './course/course.module';
 import { StickerModule } from './sticker/sticker.module';
 import { SharedModule } from './shared/shared.module';
 import { AppResolver } from './app.resolver';
+import { ExceptionsLoggerFilter } from './shared/exceptionsLogger.filter';
 
 @Module({
   imports: [
@@ -54,6 +56,6 @@ import { AppResolver } from './app.resolver';
     SharedModule,
   ],
   // controllers: [AppController],
-  providers: [AppService, AppResolver],
+  providers: [AppService, AppResolver, { provide: APP_FILTER, useClass: ExceptionsLoggerFilter }],
 })
 export class AppModule {}
