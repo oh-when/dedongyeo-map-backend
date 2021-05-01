@@ -11,6 +11,7 @@ import { Spot } from '../spot/entities/spot.entity';
 import { CreateCourseImageInput } from './dto/create-course-image.input';
 import { MapBoxNoRoutesException } from 'src/shared/exceptions';
 
+
 @Injectable()
 export class CourseImageService {
   mapboxToken: string;
@@ -68,7 +69,6 @@ export class CourseImageService {
 
   async getPolyline(coords: [Number, Number][]): Promise<String> {
     const coordsPath = urlencode(coords.map((coord, _) => coord.join(',')).join(';'));
-
     const pathUrl: string = `${this.mapboxDirectionUrl}/${coordsPath}`;
     const params = {
       alternatives: true,
