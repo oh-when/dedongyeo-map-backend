@@ -2,164 +2,20 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-"""페이지네이션 정보, """
-type PageInfo {
-  """총 문서 수"""
-  total_count: Float!
-
-  """현재 페이지가 마지막 페이지인지 여부, 값이 false면 page를 증가시켜 다음 페이지를 요청할 수 있음"""
-  is_end: Boolean!
-
-  """노출 가능 페이지 수"""
-  total_page_count: Float!
-
-  """현재 페이지 번호"""
-  cur_page: Float!
-}
-
-"""Emoji를 포함한 유저데이터를 포함하여, mongodb에 저장시킬 장소 데이터"""
-type Spot {
-  """Spot id"""
-  _id: String!
-
-  """kakao place id"""
-  place_id: String!
-
-  """list of sticker ids"""
-  stickers(populate: Boolean = false): [Sticker!]!
-  place_name: String!
-  category_name: String
-  category_group_code: String
-  category_group_name: String
-  phone: String
-  address_name: String
-  road_address_name: String
-  place_url: String
-  distance: String
-  x: Float
-  y: Float
-  is_custom: Boolean
-  is_custom_share: Boolean
-}
-
-"""'이모지 스티커'로 코스 생성에 기본적으로 사용되는 단위입니다."""
-type Sticker {
-  """Sticker id"""
-  _id: String!
-
-  """스티커 번호, 0~11"""
-  sticker_index: Float!
-
-  """스티커 당도 퍼센트"""
-  sweet_percent: Float!
-
-  """Sticker가 코스 생성에 사용여부"""
-  is_used: Boolean!
-
-  """스티커가 붙여진 Spot id 또는 Spot 객체값"""
-  spot(populate: Boolean!): Spot!
-}
-
-"""카카오 지도 api로 부터 받은 위치 정보"""
-type Place {
-  """kakao place id"""
-  id: String!
-  place_name: String!
-  category_name: String
-  category_group_code: String
-  category_group_name: String
-  phone: String
-  address_name: String
-  road_address_name: String
-  place_url: String
-  distance: String
-  x: Float
-  y: Float
-}
-
-"""페이지네이션 정보를 포함한 place 정보"""
-type PaginatedPlace {
-  """카카오 장소 페이지네이션 정보"""
-  pageInfo: PageInfo!
-
-  """카카오 장소 정보들"""
-  places: [Place!]!
-}
-
-type DeleteSpotDto {
-  ok: Int!
-  n: Int!
-  deletedCount: Int!
-}
-
 """스티커(스팟)을 순서대로 저장하고 있는 데이터 코스 정보"""
 type Course {
   """Course id"""
   _id: String!
 
-  """list of sticker ids(순서 중요)"""
-  stickers(populate: Boolean = false): [Sticker!]!
-  title: String!
+  """course의 image url"""
+  courseImage: String!
 
   """list of sticker ids(순서 중요)"""
   is_share: Boolean!
 
-  """course의 image url"""
-  courseImage: String!
-}
-
-type Query {
-  """
-  키워드로 위치 정보를 확인합니다. 
-  내부적으로 카카오 API를 요청합니다.
-  """
-  places(filters: KeywordSearchDto!): PaginatedPlace!
-
-  """(For Debugging) 카카오 place id로 스팟 검색"""
-  spot(place_id: String!): Spot!
-
-  """searchSpotDto에 매칭되는 스팟들을 반환합니다."""
-  spots(searchSpotDto: SearchSpotDto): [Spot!]!
-  stickers: [Sticker!]!
-  sticker(id: String!): Sticker!
-  courses: [Course!]!
-
-  """a Course"""
-  course(courseInput: CourseInput!): Course!
-}
-
-"""SortType은 정확도(accuracy)가 기본이며, 거리순(distance) 정렬을 원할 경우 x,y는 필수 입니다."""
-input KeywordSearchDto {
-  query: String!
-  category_group_code: String
-  x: Float
-  y: Float
-  radius: Int
-  rect: String
-
-  """결과 페이지 번호"""
-  page: Int = 1
-
-  """한 페이지에 보여질 문서의 개수, 1~15 사이의 값"""
-  size: Int = 15
-  sort: SortType
-}
-
-enum SortType {
-  distance
-  accuracy
-}
-
-"""스팟 검색으로, 해당 필드가 비워져 있을 경우 db에 저장된 모든 스팟을 반환합니다."""
-input SearchSpotDto {
-  keyword: String
-  x: Float
-  y: Float
-
-  """
-  단위 meter, 0~20000 사이의 값으로 중심 좌표부터의 반경거리. 특정 지역을 중심으로 검색하려고 할 경우 중심좌표로 쓰일 x,y와 함께 사용.
-  """
-  radius: Int = 1000
+  """list of sticker ids(순서 중요)"""
+  stickers(populate: Boolean = false): [Sticker!]!
+  title: String!
 }
 
 input CourseInput {
@@ -171,47 +27,26 @@ input CourseInput {
 }
 
 input CreateCourseImageInput {
+  """이미지 세로 사이즈"""
+  height: Float = 700
+
   """이미지 테마"""
   theme: ImageThemeType = street
 
   """이미지 가로 사이즈"""
   width: Float = 700
-
-  """이미지 세로 사이즈"""
-  height: Float = 700
 }
 
-enum ImageThemeType {
-  dark
-  light
-  street
-}
+input CreateCourseInput {
+  is_share: Boolean!
 
-type Mutation {
-  """dummy 데이터를 생성합니다."""
-  dummy(keyword: String!): Float!
-
-  """(For Debugging) 스팟 하나 삭제"""
-  removeSpot(id: String!): DeleteSpotDto!
-
-  """커스텀 스팟을 생성합니다."""
-  createCustomSpot(createCustomSpotInput: CreateCustomSpotInput!): Spot!
-
-  """커스텀 스팟을 업데이트합니다."""
-  updateCustomSpot(updateCustomSpotInput: UpdateCustomSpotInput!): Spot!
-  createSticker(createStickerInput: CreateStickerInput!): Sticker!
-  updateSticker(updateStickerInput: UpdateStickerInput!): Sticker!
-
-  """Sticker를 사용하여 코스를 생성합니다. 이때 코스의 순서는 전달된 스티커들의 순서로 처리됩니다."""
-  createCourse(createCourseInput: CreateCourseInput!): Course!
+  """list of sticker ids(순서 중요)"""
+  stickers: [String!]!
+  title: String!
 }
 
 """커스텀 스팟 생성 input입니다. 테마는 category_group_name로 넣어주세요"""
 input CreateCustomSpotInput {
-  place_name: String!
-  x: Float!
-  y: Float!
-
   """커스텀 스팟의 테마입니다. (ex. 음식점, 공원)"""
   category_group_name: String!
 
@@ -220,13 +55,211 @@ input CreateCustomSpotInput {
 
   """커스텀 스팟 공개 여부 지정, default false입니다. 공개를 할 경우, 수정할 수 없습니다."""
   is_custom_share: Boolean = false
+  place_name: String!
+  x: Float!
+  y: Float!
+}
+
+input CreateStickerInput {
+  address_name: String
+  category_group_code: String
+  category_group_name: String
+  category_name: String
+  distance: String
+
+  """Sticker가 코스 생성에 사용여부"""
+  is_used: Boolean
+  phone: String
+
+  """카카오 Place id"""
+  place_id: String!
+  place_name: String!
+  place_url: String
+  road_address_name: String
+
+  """스티커 번호, 0~11"""
+  sticker_index: Float!
+
+  """스티커 당도 퍼센트"""
+  sweet_percent: Float!
+  x: Float!
+  y: Float!
+}
+
+type DeleteSpotDto {
+  deletedCount: Int!
+  n: Int!
+  ok: Int!
+}
+
+enum ImageThemeType {
+  dark
+  light
+  street
+}
+
+"""SortType은 정확도(accuracy)가 기본이며, 거리순(distance) 정렬을 원할 경우 x,y는 필수 입니다."""
+input KeywordSearchDto {
+  category_group_code: String
+
+  """결과 페이지 번호"""
+  page: Int = 1
+  query: String!
+  radius: Int
+  rect: String
+
+  """한 페이지에 보여질 문서의 개수, 1~15 사이의 값"""
+  size: Int = 15
+  sort: SortType
+  x: Float
+  y: Float
+}
+
+type Mutation {
+  """Sticker를 사용하여 코스를 생성합니다. 이때 코스의 순서는 전달된 스티커들의 순서로 처리됩니다."""
+  createCourse(createCourseInput: CreateCourseInput!): Course!
+
+  """커스텀 스팟을 생성합니다."""
+  createCustomSpot(createCustomSpotInput: CreateCustomSpotInput!): Spot!
+  createSticker(createStickerInput: CreateStickerInput!): Sticker!
+
+  """dummy 데이터를 생성합니다."""
+  dummy(keyword: String!): Float!
+
+  """(For Debugging) 스팟 하나 삭제"""
+  removeSpot(id: String!): DeleteSpotDto!
+
+  """커스텀 스팟을 업데이트합니다."""
+  updateCustomSpot(updateCustomSpotInput: UpdateCustomSpotInput!): Spot!
+  updateSticker(updateStickerInput: UpdateStickerInput!): Sticker!
+}
+
+"""페이지네이션 정보, """
+type PageInfo {
+  """현재 페이지 번호"""
+  cur_page: Float!
+
+  """현재 페이지가 마지막 페이지인지 여부, 값이 false면 page를 증가시켜 다음 페이지를 요청할 수 있음"""
+  is_end: Boolean!
+
+  """총 문서 수"""
+  total_count: Float!
+
+  """노출 가능 페이지 수"""
+  total_page_count: Float!
+}
+
+"""페이지네이션 정보를 포함한 place 정보"""
+type PaginatedPlace {
+  """카카오 장소 페이지네이션 정보"""
+  pageInfo: PageInfo!
+
+  """카카오 장소 정보들"""
+  places: [Place!]!
+}
+
+"""카카오 지도 api로 부터 받은 위치 정보"""
+type Place {
+  address_name: String
+  category_group_code: String
+  category_group_name: String
+  category_name: String
+  distance: String
+
+  """kakao place id"""
+  id: String!
+  phone: String
+  place_name: String!
+  place_url: String
+  road_address_name: String
+  x: Float
+  y: Float
+}
+
+type Query {
+  """a Course"""
+  course(courseInput: CourseInput!): Course!
+  courses: [Course!]!
+
+  """
+  키워드로 위치 정보를 확인합니다. 
+  내부적으로 카카오 API를 요청합니다.
+  """
+  places(filters: KeywordSearchDto!): PaginatedPlace!
+
+  """(For Debugging) 카카오 place id로 스팟 검색"""
+  spot(place_id: String!): Spot!
+
+  """searchSpotDto에 매칭되는 스팟들을 반환합니다."""
+  spots(searchSpotDto: SearchSpotDto): [Spot!]!
+  sticker(id: String!): Sticker!
+  stickers: [Sticker!]!
+}
+
+"""스팟 검색으로, 해당 필드가 비워져 있을 경우 db에 저장된 모든 스팟을 반환합니다."""
+input SearchSpotDto {
+  keyword: String
+
+  """
+  단위 meter, 0~20000 사이의 값으로 중심 좌표부터의 반경거리. 특정 지역을 중심으로 검색하려고 할 경우 중심좌표로 쓰일 x,y와 함께 사용.
+  """
+  radius: Int = 1000
+  x: Float
+  y: Float
+}
+
+enum SortType {
+  accuracy
+  distance
+}
+
+"""Emoji를 포함한 유저데이터를 포함하여, mongodb에 저장시킬 장소 데이터"""
+type Spot {
+  """Spot id"""
+  _id: String!
+  address_name: String
+  category_group_code: String
+  category_group_name: String
+  category_name: String
+  distance: String
+  is_custom: Boolean
+  is_custom_share: Boolean
+  phone: String
+
+  """kakao place id"""
+  place_id: String!
+  place_name: String!
+  place_url: String
+  road_address_name: String
+
+  """list of sticker ids"""
+  stickers(populate: Boolean = false): [Sticker!]!
+  x: Float
+  y: Float
+}
+
+"""'이모지 스티커'로 코스 생성에 기본적으로 사용되는 단위입니다."""
+type Sticker {
+  """Sticker id"""
+  _id: String!
+
+  """Sticker가 코스 생성에 사용여부"""
+  is_used: Boolean!
+
+  """스티커가 붙여진 Spot id 또는 Spot 객체값"""
+  spot(populate: Boolean!): Spot!
+
+  """스티커 번호, 0~11"""
+  sticker_index: Float!
+
+  """스티커 당도 퍼센트"""
+  sweet_percent: Float!
 }
 
 """커스텀 스팟 업데이트 input입니다. is_custom_share이 false일 경우에만 동작합니다."""
 input UpdateCustomSpotInput {
-  place_name: String
-  x: Float
-  y: Float
+  """Custom Spot id"""
+  _id: String!
 
   """커스텀 스팟의 테마입니다. (ex. 음식점, 공원)"""
   category_group_name: String
@@ -236,34 +269,9 @@ input UpdateCustomSpotInput {
 
   """커스텀 스팟 공개 여부 지정, default false입니다. 공개를 할 경우, 수정할 수 없습니다."""
   is_custom_share: Boolean = false
-
-  """Custom Spot id"""
-  _id: String!
-}
-
-input CreateStickerInput {
-  """카카오 Place id"""
-  place_id: String!
-  place_name: String!
-  x: Float!
-  y: Float!
-  category_name: String
-  category_group_code: String
-  category_group_name: String
-  phone: String
-  address_name: String
-  road_address_name: String
-  place_url: String
-  distance: String
-
-  """스티커 번호, 0~11"""
-  sticker_index: Float!
-
-  """스티커 당도 퍼센트"""
-  sweet_percent: Float!
-
-  """Sticker가 코스 생성에 사용여부"""
-  is_used: Boolean
+  place_name: String
+  x: Float
+  y: Float
 }
 
 input UpdateStickerInput {
@@ -272,11 +280,4 @@ input UpdateStickerInput {
 
   """Sticker가 코스 생성에 사용여부"""
   is_used: Boolean
-}
-
-input CreateCourseInput {
-  """list of sticker ids(순서 중요)"""
-  stickers: [String!]!
-  title: String!
-  is_share: Boolean!
 }
