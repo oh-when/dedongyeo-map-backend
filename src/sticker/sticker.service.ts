@@ -1,24 +1,25 @@
-import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
-import { Model, Types } from "mongoose";
-import { InjectModel } from "@nestjs/mongoose";
-import { ConfigService } from "@nestjs/config";
+import { Injectable } from '@nestjs/common';
+import * as mongoose from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { ConfigService } from '@nestjs/config';
 
-import { CreateStickerInput, UpdateStickerInput } from "./dto/sticker.input";
-import { Sticker, StickerDocument } from "./entities/sticker.entity";
-import { SpotService } from "../spot/spot.service";
-import { Spot, SpotDocument } from "../spot/entities/spot.entity";
-import { CreateSpotInput } from "../spot/dto/create-spot.input";
+import { CreateStickerInput, UpdateStickerInput } from './dto/sticker.input';
+import { Sticker, StickerDocument } from './entities/sticker.entity';
+import { SpotService } from '../spot/spot.service';
+import { Spot, SpotDocument } from '../spot/entities/spot.entity';
+import { CreateSpotInput } from '../spot/dto/create-spot.input';
+import { StickerNotFoundException } from 'src/shared/exceptions';
 
 @Injectable()
 export class StickerService {
   sweetImgUrl: string;
 
   constructor(
-    @InjectModel(Sticker.name) private stickerModel: Model<StickerDocument>,
+    @InjectModel(Sticker.name) private stickerModel: mongoose.Model<StickerDocument>,
     private readonly spotService: SpotService,
-    private configService: ConfigService
+    private configService: ConfigService,
   ) {
-    this.sweetImgUrl = this.configService.get("app.IMG_SWEET_URL");
+    this.sweetImgUrl = this.configService.get('app.IMG_SWEET_URL');
   }
 
   async create(createStickerInput: CreateStickerInput) {
@@ -29,95 +30,58 @@ export class StickerService {
      * 3. save sticker
      */
 
-    const stickerDocument: StickerDocument = new this.stickerModel(
-      createStickerInput
-    );
+    const stickerDocument: StickerDocument = new this.stickerModel(createStickerInput);
 
-    let spot:
-      | Spot
-      | SpotDocument
-      | null = await this.spotService.findOneByPlaceId(
-      createStickerInput.place_id
-    );
+    let spot: Spot | SpotDocument | null = await this.spotService.findOneByPlaceId(createStickerInput.place_id);
 
     if (spot === null) {
       // 커스텀 스팟은 절대 올 수 없다.
-      spot = await this.spotService.document(
-        createStickerInput as CreateSpotInput
-      );
-
+      spot = await this.spotService.document(createStickerInput as CreateSpotInput);
       spot.stickers.push(stickerDocument._id);
       await this.spotService.save(spot as SpotDocument);
     } else {
-      spot = await this.spotService.appendSticker(
-        spot._id,
-        stickerDocument._id
-      );
+      spot = await this.spotService.appendSticker(spot._id, stickerDocument._id);
     }
     stickerDocument.spot = spot._id;
-    return stickerDocument.save().catch((error) => {
-      throw new HttpException(
-        `cannot create a sticker cause of ${error.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
-    });
+    return stickerDocument.save();
   }
 
   async update(updateStickerInput: UpdateStickerInput): Promise<Sticker> {
+    const stickerId = updateStickerInput._id;
     return this.stickerModel
-      .findOneAndUpdate(
-        { _id: updateStickerInput._id },
-        { $set: updateStickerInput },
-        { new: true }
-      )
+      .findOneAndUpdate({ _id: stickerId }, { $set: updateStickerInput }, { new: true })
       .exec()
-      .catch((err) => {
-        throw new HttpException(
-          `cannot update a sticker cause of ${err.message}`,
-          HttpStatus.BAD_REQUEST
-        );
+      .catch(err => {
+        throw new StickerNotFoundException(stickerId);
       });
   }
 
-  async findOne(_id: Types.ObjectId): Promise<Sticker> {
+  async findOne(stickerId: mongoose.Types.ObjectId): Promise<Sticker> {
     return this.stickerModel
-      .findById(_id)
+      .findById(stickerId)
       .exec()
-      .catch((err) => {
-        throw new HttpException(
-          `cannot find a sticker cause of ${err.message}`,
-          HttpStatus.BAD_REQUEST
-        );
+      .catch(err => {
+        throw new StickerNotFoundException(stickerId);
       });
   }
 
-  async findAll(ids: Types.ObjectId[] | null = null): Promise<Sticker[]> {
+  async findAll(ids: mongoose.Types.ObjectId[] | null = null): Promise<Sticker[]> {
     const filters = ids ? { _id: { $in: ids } } : {};
-    return this.stickerModel
-      .find(filters)
-      .exec()
-      .catch((err) => {
-        throw new HttpException(
-          `cannot find stickers cause of ${err.message}`,
-          HttpStatus.BAD_REQUEST
-        );
-      });
+    return this.stickerModel.find(filters).exec();
   }
 
-  async getImageUrls(stickerIds: Types.ObjectId[]): Promise<String[]> {
+  async getImageUrls(stickerIds: mongoose.Types.ObjectId[]): Promise<String[]> {
     const stickers: Sticker[] = await this.findAll(stickerIds);
-    const imageUrls: String[] = stickers.map((s) => {
+    const imageUrls: String[] = stickers.map(s => {
       return `${this.sweetImgUrl}/${s.sweet_percent}_${s.sticker_index}.png`;
     });
     return imageUrls;
   }
 
-  async getAllSpots(stickerIds: Types.ObjectId[]): Promise<Spot[]> {
+  async getAllSpots(stickerIds: mongoose.Types.ObjectId[]): Promise<Spot[]> {
     const stickers: Sticker[] = await this.findAll(stickerIds);
 
-    const spotIds: Types.ObjectId[] = stickers.map(
-      (s) => s.spot as Types.ObjectId
-    );
+    const spotIds: mongoose.Types.ObjectId[] = stickers.map(s => s.spot as mongoose.Types.ObjectId);
     return this.spotService.findAll(spotIds);
   }
 }
