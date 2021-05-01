@@ -37,8 +37,32 @@ export class StickerNotFoundException extends BadRequestException {
   }
 }
 
+export class SpotNotFoundException extends BadRequestException {
+  constructor(placeName: RegExp) {
+    super(`Spot(place name: ${placeName}) Not Found`);
+  }
+}
+
+export class CustomSpotValidationException extends BadRequestException {
+  constructor() {
+    super(`커스텀 스팟의 "is_custom" field true로 설정되어야 합니다.`);
+  }
+}
+
+export class CustomSpotUpdateWhenPublicException extends BadRequestException {
+  constructor() {
+    super(`공개 설정이된 커스텀 스팟은 수정 되어서는 안됩니다.`);
+  }
+}
+
 export class KakaoApiServerError extends InternalServerErrorException {
   constructor() {
     super(`Kakao API server error`);
+  }
+}
+
+export class SpotNoNearException extends InternalServerErrorException {
+  constructor(coordinates: number[]) {
+    super(`There are no near spots from ${coordinates}`);
   }
 }

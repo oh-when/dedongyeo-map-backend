@@ -56,7 +56,7 @@ export class SearchService {
       radius: 1,
       sort: SortType.distance,
     })
-      .then(({ places }) => (places.length >= 1 ? places[0] : null))
+      .then(({ places }) => places[0])
       .catch(error => {
         throw new PlaceNotFoundIdenticalException(createSpotInput.place_name);
       });
