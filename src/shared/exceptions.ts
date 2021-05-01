@@ -1,4 +1,5 @@
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import * as mongoose from 'mongoose';
 import { KeywordSearchDto } from '../place/kakaoMapSearch/search.dto';
 
 export class PlaceNotFoundException extends BadRequestException {
@@ -18,12 +19,6 @@ export class PlaceNotFoundIdenticalException extends BadRequestException {
   }
 }
 
-export class KakaoApiServerError extends InternalServerErrorException {
-  constructor() {
-    super(`Kakao API server error`);
-  }
-}
-
 export class CourseNotFoundException extends BadRequestException {
   constructor(courseId: String) {
     super(`Course(id: ${courseId}) Not Found`);
@@ -33,5 +28,17 @@ export class CourseNotFoundException extends BadRequestException {
 export class MapBoxNoRoutesException extends BadRequestException {
   constructor(routes: Object) {
     super(`There is no "Course-Routes" which is given by Mapbox.\r\n Routes info: ${routes}`);
+  }
+}
+
+export class StickerNotFoundException extends BadRequestException {
+  constructor(stickerId: mongoose.Types.ObjectId) {
+    super(`Sticker(id: ${stickerId}) Not Found`);
+  }
+}
+
+export class KakaoApiServerError extends InternalServerErrorException {
+  constructor() {
+    super(`Kakao API server error`);
   }
 }

@@ -1,60 +1,42 @@
-import {
-  Resolver,
-  Query,
-  Mutation,
-  Args,
-  ResolveField,
-  Parent,
-} from "@nestjs/graphql";
-import { Types } from "mongoose";
+import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
+import * as mongoose from 'mongoose';
 
-import { StickerService } from "./sticker.service";
-import { Sticker, StickerDocument } from "./entities/sticker.entity";
-import { CreateStickerInput, UpdateStickerInput } from "./dto/sticker.input";
-import { SpotService } from "../spot/spot.service";
-import { Spot } from "../spot/entities/spot.entity";
+import { StickerService } from './sticker.service';
+import { Sticker, StickerDocument } from './entities/sticker.entity';
+import { CreateStickerInput, UpdateStickerInput } from './dto/sticker.input';
+import { SpotService } from '../spot/spot.service';
+import { Spot } from '../spot/entities/spot.entity';
 
 @Resolver(() => Sticker)
 export class StickerResolver {
-  constructor(
-    private readonly stickerService: StickerService,
-    private readonly spotService: SpotService
-  ) {}
+  constructor(private readonly stickerService: StickerService, private readonly spotService: SpotService) {}
 
   @Mutation(() => Sticker)
-  async createSticker(
-    @Args("createStickerInput") createStickerInput: CreateStickerInput
-  ): Promise<Sticker> {
+  async createSticker(@Args('createStickerInput') createStickerInput: CreateStickerInput): Promise<Sticker> {
     return await this.stickerService.create(createStickerInput);
   }
 
   @Mutation(() => Sticker)
-  async updateSticker(
-    @Args("updateStickerInput") updateStickerInput: UpdateStickerInput
-  ): Promise<Sticker> {
+  async updateSticker(@Args('updateStickerInput') updateStickerInput: UpdateStickerInput): Promise<Sticker> {
     return await this.stickerService.update(updateStickerInput);
   }
 
-  @Query(() => [Sticker], { name: "stickers" })
+  @Query(() => [Sticker], { name: 'stickers' })
   findAll() {
     return this.stickerService.findAll();
   }
 
-  @Query(() => Sticker, { name: "sticker" })
-  findOne(@Args("id", { type: () => String }) id: Types.ObjectId) {
+  @Query(() => Sticker, { name: 'sticker' })
+  findOne(@Args('id', { type: () => String }) id: mongoose.Types.ObjectId) {
     return this.stickerService.findOne(id);
   }
 
   @ResolveField(() => Spot, {
-    description:
-      "populate: true 경우 spot_id를 spot 값으로 치환하여 반환합니다.",
+    description: 'populate: true 경우 spot_id를 spot 값으로 치환하여 반환합니다.',
   })
-  async spot(
-    @Parent() sticker: StickerDocument,
-    @Args("populate") populate: boolean
-  ) {
+  async spot(@Parent() sticker: StickerDocument, @Args('populate') populate: boolean) {
     if (populate) {
-      return await this.spotService.findOne(sticker.spot as Types.ObjectId);
+      return await this.spotService.findOne(sticker.spot as mongoose.Types.ObjectId);
     }
     return sticker.spot;
   }
