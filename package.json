@@ -11,7 +11,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "NODE_ENV=dev nest start --watch",
-    "start:sandbox": "NODE_ENV=sandbox npm run build && node dist/main",
+    "start:sandbox": "NODE_ENV=sandbox node dist/main",
     "start:prod": "NODE_ENV=production node dist/main",
     "test:e2e": "NODE_ENV=test jest --config ./test/jest-e2e.json"
   },
