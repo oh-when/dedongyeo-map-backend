@@ -11,6 +11,7 @@ const configMap = {
   KAKAO_API_SEARCH: process.env.KAKAO_API_SEARCH,
   MONGO_IP: process.env.MONGO_IP,
   MONGO_PORT: process.env.MONGO_PORT,
+  MONGO_HOST: process.env.MONGO_HOST,
   MONGO_USER: process.env.MONGO_USER,
   MONGO_PWD: process.env.MONGO_PWD,
   MONGO_DB_NAME: process.env.MONGO_DB_NAME,
