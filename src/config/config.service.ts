@@ -26,11 +26,14 @@ export class AppConfigService {
     }
 
     if (level === 'sandbox') {
-      return `mongodb+srv://${this.configService.get('app.MONGO_USER')}:${this.configService.get(
+      const dbHost = `mongodb+srv://${this.configService.get('app.MONGO_USER')}:${this.configService.get(
         'app.MONGO_PWD',
       )}@${this.configService.get('app.MONGO_HOST')}/${this.configService.get(
         'app.MONGO_DB_NAME',
       )}?retryWrites=true&w=majority`;
+
+      console.log(dbHost);
+      return dbHost;
     }
 
     if (level === 'production') {
