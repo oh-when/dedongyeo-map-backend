@@ -18,6 +18,7 @@ import { StickerModule } from './sticker/sticker.module';
 import { SharedModule } from './shared/shared.module';
 import { AppResolver } from './app.resolver';
 import { ExceptionsLoggerFilter } from './shared/exceptionsLogger.filter';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { ExceptionsLoggerFilter } from './shared/exceptionsLogger.filter';
     CourseModule,
     UserModule,
     SharedModule,
+    AuthModule,
   ],
   // controllers: [AppController],
   providers: [AppService, AppResolver, { provide: APP_FILTER, useClass: ExceptionsLoggerFilter }],
