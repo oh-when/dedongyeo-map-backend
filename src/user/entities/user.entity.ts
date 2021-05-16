@@ -26,6 +26,10 @@ export class User {
   @Prop({ required: true })
   phone: string;
 
+  @Field(() => String, { description: '소셜 로그인시 받는 ID값' })
+  @Prop({ required: false })
+  socialUid: string;
+
   @Field(() => Boolean, { description: '소셜 회원가입 여부' })
   @Prop({ default: false })
   isSocial: boolean;
