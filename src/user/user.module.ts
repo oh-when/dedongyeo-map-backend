@@ -9,7 +9,7 @@ import { JwtStrategy } from '../auth/strategy/jwt.strategy';
 
 @Module({
   imports: [
-    JwtModule.register({ secret: 'jae21l' }),
+    JwtModule.register({ secret: '1234' }),
     MongooseModule.forFeatureAsync([
       {
         name: User.name,
