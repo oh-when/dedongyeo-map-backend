@@ -2,9 +2,7 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 
-@ObjectType({
-  description: '',
-})
+@ObjectType()
 @Schema({ timestamps: true })
 export class User {
   @Field(() => String, { description: 'user id' })
@@ -15,8 +13,8 @@ export class User {
   email: string;
 
   @Field(() => String)
-  @Prop({ select: false })
-  password: string;
+  @Prop()
+  password?: string;
 
   @Field(() => String)
   @Prop({ required: true })
@@ -28,11 +26,7 @@ export class User {
 
   @Field(() => String, { description: '소셜 로그인시 받는 ID값' })
   @Prop({ required: false })
-  socialUid: string;
-
-  @Field(() => Boolean, { description: '소셜 회원가입 여부' })
-  @Prop({ default: false })
-  isSocial: boolean;
+  socialUid?: string;
 
   @Field(() => String, { description: '회원 탈퇴여부' })
   @Prop({
@@ -42,9 +36,20 @@ export class User {
   })
   status: string;
 
+  @Field(() => Boolean, { description: '마케팅 활용 동의여부' })
+  @Prop({
+    type: Boolean,
+    default: true,
+  })
+  isAcceptTerms: boolean;
+
   @Field(() => Date)
-  @Prop({ type: Date, default: new Date() })
+  @Prop({ type: Date, default: Date.now() })
   createdAt: Date;
+
+  @Field(() => Date)
+  @Prop({ type: Date, default: Date.now() })
+  updatedAt: Date;
 }
 
 export type UserDocument = User & mongoose.Document;

@@ -55,7 +55,6 @@ input CreateCustomSpotInput {
 
   """커스텀 스팟 공개 여부 지정, default false입니다. 공개를 할 경우, 수정할 수 없습니다."""
   is_custom_share: Boolean = false
-
   place_name: String!
   x: Float!
   y: Float!
@@ -86,6 +85,11 @@ input CreateStickerInput {
   x: Float!
   y: Float!
 }
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 type DeleteSpotDto {
   deletedCount: Int!
@@ -122,7 +126,9 @@ type Mutation {
 
   """커스텀 스팟을 생성합니다."""
   createCustomSpot(createCustomSpotInput: CreateCustomSpotInput!): Spot!
+  createSNSUser(createSNSUserInput: createSnsUserInput!): User!
   createSticker(createStickerInput: CreateStickerInput!): Sticker!
+  createUser(createUserInput: createUserInput!): User!
 
   """dummy 데이터를 생성합니다."""
   dummy(keyword: String!): Float!
@@ -177,41 +183,11 @@ type Place {
   y: Float
 }
 
-"""페이지네이션 정보를 포함한 place 정보"""
-type PaginatedPlace {
-  """카카오 장소 페이지네이션 정보"""
-  pageInfo: PageInfo!
-
-  """카카오 장소 정보들"""
-  places: [Place!]!
-}
-
-type DeleteSpotDto {
-  ok: Int!
-  n: Int!
-  deletedCount: Int!
-}
-
-"""스티커(스팟)을 순서대로 저장하고 있는 데이터 코스 정보"""
-type Course {
-  """Course id"""
-  _id: String!
-
-  """list of sticker ids(순서 중요)"""
-  stickers(populate: Boolean = false): [Sticker!]!
-  title: String!
-
-  """list of sticker ids(순서 중요)"""
-  is_share: Boolean!
-
-  """course의 image url"""
-  courseImage: String!
-}
-
 type Query {
   """a Course"""
   course(courseInput: CourseInput!): Course!
   courses: [Course!]!
+
   """
   키워드로 위치 정보를 확인합니다. 
   내부적으로 카카오 API를 요청합니다.
@@ -225,6 +201,7 @@ type Query {
   spots(searchSpotDto: SearchSpotDto): [Spot!]!
   sticker(id: String!): Sticker!
   stickers: [Sticker!]!
+  users: [User!]!
 }
 
 """스팟 검색으로, 해당 필드가 비워져 있을 경우 db에 저장된 모든 스팟을 반환합니다."""
@@ -313,133 +290,36 @@ input UpdateStickerInput {
   is_used: Boolean
 }
 
-"""스팟 검색으로, 해당 필드가 비워져 있을 경우 db에 저장된 모든 스팟을 반환합니다."""
-input SearchSpotDto {
-  keyword: String
-  x: Float
-  y: Float
-
-  """
-  단위 meter, 0~20000 사이의 값으로 중심 좌표부터의 반경거리. 특정 지역을 중심으로 검색하려고 할 경우 중심좌표로 쓰일 x,y와 함께 사용.
-  """
-  radius: Int = 1000
-}
-
-input CourseInput {
-  """코스 id"""
-  courseId: String!
-
-  """course input을 채우면, 이미지 url을 생성하여 전달합니다."""
-  courseImageInput: CreateCourseImageInput
-}
-
-input CreateCourseImageInput {
-  """이미지 테마"""
-  theme: ImageThemeType = street
-
-  """이미지 가로 사이즈"""
-  width: Float = 700
-
-  """이미지 세로 사이즈"""
-  height: Float = 700
-}
-
-enum ImageThemeType {
-  dark
-  light
-  street
-}
-
-type Mutation {
-  """dummy 데이터를 생성합니다."""
-  dummy(keyword: String!): Float!
-
-  """(For Debugging) 스팟 하나 삭제"""
-  removeSpot(id: String!): DeleteSpotDto!
-
-  """커스텀 스팟을 생성합니다."""
-  createCustomSpot(createCustomSpotInput: CreateCustomSpotInput!): Spot!
-
-  """커스텀 스팟을 업데이트합니다."""
-  updateCustomSpot(updateCustomSpotInput: UpdateCustomSpotInput!): Spot!
-  createSticker(createStickerInput: CreateStickerInput!): Sticker!
-  updateSticker(updateStickerInput: UpdateStickerInput!): Sticker!
-
-  """Sticker를 사용하여 코스를 생성합니다. 이때 코스의 순서는 전달된 스티커들의 순서로 처리됩니다."""
-  createCourse(createCourseInput: CreateCourseInput!): Course!
-}
-
-"""커스텀 스팟 생성 input입니다. 테마는 category_group_name로 넣어주세요"""
-input CreateCustomSpotInput {
-  place_name: String!
-  x: Float!
-  y: Float!
-
-  """커스텀 스팟의 테마입니다. (ex. 음식점, 공원)"""
-  category_group_name: String!
-
-  """커스텀 스팟 여부 지정, default true입니다."""
-  is_custom: Boolean = true
-
-  """커스텀 스팟 공개 여부 지정, default false입니다. 공개를 할 경우, 수정할 수 없습니다."""
-  is_custom_share: Boolean = false
-}
-
-"""커스텀 스팟 업데이트 input입니다. is_custom_share이 false일 경우에만 동작합니다."""
-input UpdateCustomSpotInput {
-  place_name: String
-  x: Float
-  y: Float
-
-  """커스텀 스팟의 테마입니다. (ex. 음식점, 공원)"""
-  category_group_name: String
-
-  """커스텀 스팟 여부 지정, default true입니다."""
-  is_custom: Boolean = true
-
-  """커스텀 스팟 공개 여부 지정, default false입니다. 공개를 할 경우, 수정할 수 없습니다."""
-  is_custom_share: Boolean = false
-
-  """Custom Spot id"""
+type User {
+  """user id"""
   _id: String!
+  createdAt: DateTime!
+  email: String!
+
+  """마케팅 활용 동의여부"""
+  isAcceptTerms: Boolean!
+  nickName: String!
+  password: String!
+  phone: String!
+
+  """소셜 로그인시 받는 ID값"""
+  socialUid: String!
+
+  """회원 탈퇴여부"""
+  status: String!
+  updatedAt: DateTime!
 }
 
-input CreateStickerInput {
-  """카카오 Place id"""
-  place_id: String!
-  place_name: String!
-  x: Float!
-  y: Float!
-  category_name: String
-  category_group_code: String
-  category_group_name: String
-  phone: String
-  address_name: String
-  road_address_name: String
-  place_url: String
-  distance: String
-
-  """스티커 번호, 0~11"""
-  sticker_index: Float!
-
-  """스티커 당도 퍼센트"""
-  sweet_percent: Float!
-
-  """Sticker가 코스 생성에 사용여부"""
-  is_used: Boolean
+input createSnsUserInput {
+  email: String!
+  nickName: String!
+  phone: String!
+  socialUid: String!
 }
 
-input UpdateStickerInput {
-  """Sticker id"""
-  _id: String!
-
-  """Sticker가 코스 생성에 사용여부"""
-  is_used: Boolean
-}
-
-input CreateCourseInput {
-  """list of sticker ids(순서 중요)"""
-  stickers: [String!]!
-  title: String!
-  is_share: Boolean!
+input createUserInput {
+  email: String!
+  nickName: String!
+  password: String!
+  phone: String!
 }
