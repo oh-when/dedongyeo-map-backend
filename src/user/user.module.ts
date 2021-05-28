@@ -4,9 +4,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserDocument, UserSchema } from './entities/user.entity';
 import { UserResolver } from './user.resolver';
 import * as bcrypt from 'bcrypt';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from '../auth/strategy/jwt.strategy';
 
 @Module({
   imports: [
+    JwtModule.register({ secret: 'jae21l' }),
     MongooseModule.forFeatureAsync([
       {
         name: User.name,
@@ -25,7 +28,7 @@ import * as bcrypt from 'bcrypt';
       },
     ]),
   ],
-  providers: [UserService, UserResolver],
+  providers: [UserService, UserResolver, JwtStrategy],
   exports: [UserService],
 })
 export class UserModule {}

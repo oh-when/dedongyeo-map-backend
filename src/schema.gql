@@ -120,6 +120,11 @@ input KeywordSearchDto {
   y: Float
 }
 
+type LoginPayload {
+  accessToken: String!
+  user: User!
+}
+
 type Mutation {
   """Sticker를 사용하여 코스를 생성합니다. 이때 코스의 순서는 전달된 스티커들의 순서로 처리됩니다."""
   createCourse(createCourseInput: CreateCourseInput!): Course!
@@ -132,6 +137,7 @@ type Mutation {
 
   """dummy 데이터를 생성합니다."""
   dummy(keyword: String!): Float!
+  login(loginInput: loginInput!): LoginPayload!
 
   """(For Debugging) 스팟 하나 삭제"""
   removeSpot(id: String!): DeleteSpotDto!
@@ -322,4 +328,9 @@ input createUserInput {
   nickName: String!
   password: String!
   phone: String!
+}
+
+input loginInput {
+  email: String!
+  password: String!
 }

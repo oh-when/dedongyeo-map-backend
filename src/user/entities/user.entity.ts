@@ -1,4 +1,4 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, HideField, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 
@@ -12,6 +12,7 @@ export class User {
   @Prop({ required: true, unique: true })
   email: string;
 
+  @HideField()
   @Field(() => String)
   @Prop()
   password?: string;
