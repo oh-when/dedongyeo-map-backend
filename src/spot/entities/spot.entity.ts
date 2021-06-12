@@ -1,25 +1,24 @@
-import { ObjectType, Field, ID, Int, Float } from "@nestjs/graphql";
-import * as mongoose from "mongoose";
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { ObjectType, Field, ID, Int, Float } from '@nestjs/graphql';
+import * as mongoose from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import { Sticker } from "../../sticker/entities/sticker.entity";
-import { PageInfo } from "../../shared/entities/pageinfo.entity";
+import { Sticker } from '../../sticker/entities/sticker.entity';
+import { PageInfo } from '../../shared/entities/pageinfo.entity';
 
 @ObjectType({
-  description:
-    "Emoji를 포함한 유저데이터를 포함하여, mongodb에 저장시킬 장소 데이터",
+  description: 'Emoji를 포함한 유저데이터를 포함하여, mongodb에 저장시킬 장소 데이터',
 })
 @Schema({ timestamps: true })
 export class Spot {
-  @Field(() => String, { description: "Spot id" })
-  _id: mongoose.Types.ObjectId;
+  @Field(() => String, { description: 'Spot id' })
+  _id?: mongoose.Types.ObjectId;
 
-  @Field(() => String, { description: "kakao place id" })
+  @Field(() => String, { description: 'kakao place id' })
   @Prop({ required: true, unique: true })
   place_id: string;
 
-  @Field(() => [Sticker], { description: "list of sticker ids" })
-  @Prop({ type: [mongoose.Types.ObjectId], ref: "Sticker" })
+  @Field(() => [Sticker], { description: 'list of sticker ids' })
+  @Prop({ type: [mongoose.Types.ObjectId], ref: 'Sticker' })
   stickers: mongoose.Types.ObjectId[] | Sticker[];
 
   @Field(() => String)
@@ -61,44 +60,44 @@ export class Spot {
   @Prop({
     type: {
       type: String,
-      enum: ["Point"],
-      default: "Point",
+      enum: ['Point'],
+      default: 'Point',
       required: true,
     },
     coordinates: {
       type: [Number],
       required: true,
-      index: "2dsphere",
+      index: '2dsphere',
       default: [0, 0],
     },
   })
   location: string;
 
-  @Field((type) => Float, { nullable: true })
+  @Field(type => Float, { nullable: true })
   @Prop()
   x?: number;
 
-  @Field((type) => Float, { nullable: true })
+  @Field(type => Float, { nullable: true })
   @Prop()
   y?: number;
 
-  @Field((type) => Boolean, { defaultValue: false, nullable: true })
+  @Field(type => Boolean, { defaultValue: false, nullable: true })
   @Prop()
   is_custom?: boolean;
 
-  @Field((type) => Boolean, { defaultValue: false, nullable: true })
+  @Field(type => Boolean, { defaultValue: false, nullable: true })
   @Prop()
   is_custom_share?: boolean;
 }
 
 @ObjectType({
-  description: "페이지네이션 정보를 포함한 spot 정보",
+  description: '페이지네이션 정보를 포함한 spot 정보',
 })
 export class PaginatedSpot {
-  @Field(() => PageInfo, { description: "카카오 장소 페이지네이션 정보" })
+  @Field(() => PageInfo, { description: '카카오 장소 페이지네이션 정보' })
   pageInfo: PageInfo;
 
-  @Field(() => [Spot], { description: "카카오 장소 정보들" })
+  @Field(() => [Spot], { description: '카카오 장소 정보들' })
   spots: Spot[];
 }
 
