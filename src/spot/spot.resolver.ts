@@ -68,7 +68,6 @@ export class SpotResolver {
   })
   async updateCustomSpot(@Args('updateCustomSpotInput') updateCustomSpotInput: UpdateCustomSpotInput): Promise<Spot> {
     const result = await this.spotService.updateCustomSpot(updateCustomSpotInput);
-
     return result;
   }
 

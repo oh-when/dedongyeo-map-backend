@@ -68,7 +68,6 @@ export class CourseImageService {
 
   async getPolyline(coords: [Number, Number][]): Promise<String> {
     const coordsPath = urlencode(coords.map((coord, _) => coord.join(',')).join(';'));
-
     const pathUrl: string = `${this.mapboxDirectionUrl}/${coordsPath}`;
     const params = {
       alternatives: true,

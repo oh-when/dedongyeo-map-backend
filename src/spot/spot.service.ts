@@ -59,7 +59,6 @@ export class SpotService {
     };
 
     const customSpotDocument: SpotDocument = await new this.spotModel(createSpotDto);
-
     // 커스텀 스팟의 경우 place_id에 spot_id를 넣는다. (unique key 확보)
     // 추가로 카카오 place_id는 string이기 때문에 mongodb objectId와 매칭될 수 없으므로 unique 만족한다.
     customSpotDocument.place_id = customSpotDocument._id.toString();
