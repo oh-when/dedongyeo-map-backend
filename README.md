@@ -1,4 +1,4 @@
-# `데동여지도` 🗺️❤️
+# `데동여지도 ` 🗺️❤️
 
 > 위치기반 데이트 기록/공유 웹
 
@@ -26,23 +26,10 @@
 
 <!-- TOC -->
 
-- [`데동여지도` 🗺️❤️](#데동여지도-️️)
-  - [1. 프로젝트 실행(local)](#1-프로젝트-실행local)
-  - [2. 의존성 세팅](#2-의존성-세팅)
-  - [3. 프로젝트 세팅](#3-프로젝트-세팅)
-  - [4. 프로젝트 구조](#4-프로젝트-구조)
-  - [5. Playground](#5-playground)
-  - [6. infrastructure](#6-infrastructure)
-  - [7. API](#7-api)
-  - [8. LINKS](#8-links)
-  - [9. SCHEMA of GraphQL API](#9-schema-of-graphql-api)
-  - [10. deploy sandbox](#10-deploy-sandbox)
-    - [Heroku](#heroku)
-  - [deploy production](#deploy-production)
-    - [gcp cloud run](#gcp-cloud-run)
-    - [mongodb atlas](#mongodb-atlas)
-    - [Cloud Run CD](#cloud-run-cd)
-  - [mapbox](#mapbox)
+- [Heroku](#heroku)
+- [gcp cloud run](#gcp-cloud-run)
+- [mongodb atlas](#mongodb-atlas)
+- [Cloud Run CD](#cloud-run-cd)
 
 <!-- /TOC -->
 
