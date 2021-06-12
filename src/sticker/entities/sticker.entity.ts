@@ -40,6 +40,7 @@ export class Sticker {
 
   @Field(() => Spot, {
     description: '스티커가 붙여진 Spot id 또는 Spot 객체값',
+    nullable: true,
   })
   @Prop({ type: mongoose.Types.ObjectId, ref: 'Spot' })
   spot?: mongoose.Types.ObjectId | Spot;

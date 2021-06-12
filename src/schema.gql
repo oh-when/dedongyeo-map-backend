@@ -247,7 +247,7 @@ type Sticker {
   is_used: Boolean!
 
   """스티커가 붙여진 Spot id 또는 Spot 객체값"""
-  spot(populate: Boolean!): Spot!
+  spot(populate: Boolean!): Spot
 
   """스티커 번호, 0~11"""
   sticker_index: Float!
