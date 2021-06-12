@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID, Int, Float } from '@nestjs/graphql';
+import { ObjectType, Field, Float } from '@nestjs/graphql';
 import * as mongoose from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
@@ -71,7 +71,7 @@ export class Spot {
       default: [0, 0],
     },
   })
-  location: string;
+  location: ILocation;
 
   @Field(type => Float, { nullable: true })
   @Prop()

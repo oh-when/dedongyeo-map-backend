@@ -12,17 +12,6 @@ import { SearchSpotDto } from './dto/search-spot.dto';
 export class SpotResolver {
   constructor(private readonly spotService: SpotService) {}
 
-  @Query(() => Spot, {
-    name: 'spot',
-    description: '(For Debugging) 카카오 place id로 스팟 검색',
-  })
-  async findOne(@Args('place_id', { type: () => String }) place_id: string) {
-    const result = await this.spotService.findOneByPlaceId(place_id);
-    if (result) {
-      throw new HttpException('There is no spots that matched by kakao id.', HttpStatus.BAD_REQUEST);
-    }
-  }
-
   @Query(() => [Spot], {
     name: 'spots',
     description: 'searchSpotDto에 매칭되는 스팟들을 반환합니다.',

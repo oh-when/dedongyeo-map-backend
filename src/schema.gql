@@ -187,9 +187,6 @@ type Query {
   """
   places(filters: KeywordSearchDto!): PaginatedPlace!
 
-  """(For Debugging) 카카오 place id로 스팟 검색"""
-  spot(place_id: String!): Spot!
-
   """searchSpotDto에 매칭되는 스팟들을 반환합니다."""
   spots(searchSpotDto: SearchSpotDto): [Spot!]!
   sticker(id: String!): Sticker!

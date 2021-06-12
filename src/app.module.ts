@@ -43,6 +43,7 @@ import { ExceptionsLoggerFilter } from './shared/exceptionsLogger.filter';
         return {
           uri: await cfs.getDB(),
           useNewUrlParser: true,
+          // useFindAndModify: false,
         };
       },
       inject: [AppConfigService],

@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model, Mongoose, Types } from 'mongoose';
 import { SearchService } from '../place/kakaoMapSearch/search.service';
 
 import { CreateSpotInput } from '../spot/dto/create-spot.input';
@@ -10,6 +10,7 @@ import { SearchSpotDto } from '../spot/dto/search-spot.dto';
 import { Spot, SpotDocument } from '../spot/entities/spot.entity';
 import { Place } from '../place/place.entity';
 import { Sticker } from '../sticker/entities/sticker.entity';
+
 import {
   CustomSpotUpdateWhenPublicException,
   CustomSpotValidationException,
@@ -24,27 +25,26 @@ export class SpotService {
     private readonly searchService: SearchService,
   ) {}
 
-  async document(createSpotInput: CreateSpotInput): Promise<SpotDocument | Spot> {
+  async findOneOrCreateWithSticker(createSpotInput: CreateSpotInput): Promise<SpotDocument> {
     const place: Place = await this.searchService.getIdenticalPlace(createSpotInput);
-
-    // 정책: createSpotInput의 place_id와 카카오 API로 검색한 place가 다를 경우
-    // 카카오 API(place.id)를 기준으로 저장시킨다.
-    if (place.id !== createSpotInput.place_id) {
-      const spot: Spot = await this.findOneByPlaceId(place.id);
-      if (spot !== null) return spot;
-    }
-
-    const createSpotDto = {
-      place_id: place.id,
-      location: { type: 'Point', coordinates: [place.x, place.y] },
-      ...place,
-    };
-
-    return new this.spotModel(createSpotDto);
+    return await this.spotModel.findOneAndUpdate(
+      { place_id: place.id },
+      {
+        ...place,
+        ...createSpotInput,
+        place_id: place.id,
+        location: { type: 'Point', coordinates: [place.x, place.y] }, //https://stackoverflow.com/questions/54254763/missing-the-following-properties-from-type-location-location-ancestororigins
+      },
+      {
+        upsert: true,
+        new: true,
+        runValidators: true,
+      },
+    );
   }
 
-  async save(spotDocument: SpotDocument): Promise<Spot> {
-    return spotDocument.save();
+  async appendSticker(spotId: Types.ObjectId, stickerId: Types.ObjectId): Promise<Spot> {
+    return this.spotModel.findOneAndUpdate({ _id: spotId }, { $push: { stickers: stickerId } });
   }
 
   async createCustomSpot(createCustomSpotInput: CreateCustomSpotInput): Promise<Spot> {
@@ -84,16 +84,8 @@ export class SpotService {
     );
   }
 
-  async appendSticker(spotId: Types.ObjectId, stickerId: Types.ObjectId): Promise<Spot> {
-    return this.spotModel.findOneAndUpdate({ _id: spotId }, { $push: { stickers: stickerId } });
-  }
-
   async findOne(_id: Types.ObjectId): Promise<SpotDocument> {
     return this.spotModel.findById(_id).exec();
-  }
-
-  async findOneByPlaceId(place_id: string): Promise<SpotDocument> {
-    return this.spotModel.findOne({ place_id }).exec();
   }
 
   async findAll(ids: Types.ObjectId[] | null = null): Promise<Spot[]> {

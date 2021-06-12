@@ -31,18 +31,10 @@ export class StickerService {
      */
 
     const stickerDocument: StickerDocument = new this.stickerModel(createStickerInput);
-
-    let spot: Spot | SpotDocument | null = await this.spotService.findOneByPlaceId(createStickerInput.place_id);
-
-    if (spot === null) {
-      // 커스텀 스팟은 절대 올 수 없다.
-      spot = await this.spotService.document(createStickerInput as CreateSpotInput);
-      spot.stickers.push(stickerDocument._id);
-      await this.spotService.save(spot as SpotDocument);
-    } else {
-      spot = await this.spotService.appendSticker(spot._id, stickerDocument._id);
-    }
+    let spot: SpotDocument = await this.spotService.findOneOrCreateWithSticker(createStickerInput as CreateSpotInput);
+    await this.spotService.appendSticker(spot._id, stickerDocument._id);
     stickerDocument.spot = spot._id;
+
     return stickerDocument.save();
   }
 
