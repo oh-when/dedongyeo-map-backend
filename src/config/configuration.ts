@@ -1,5 +1,5 @@
-import { registerAs } from "@nestjs/config";
-import * as dotenv from "dotenv";
+import { registerAs } from '@nestjs/config';
+import * as dotenv from 'dotenv';
 
 const configMap = {
   NODE_ENV: process.env.NODE_ENV,
@@ -11,6 +11,7 @@ const configMap = {
   KAKAO_API_SEARCH: process.env.KAKAO_API_SEARCH,
   MONGO_IP: process.env.MONGO_IP,
   MONGO_PORT: process.env.MONGO_PORT,
+  MONGO_HOST: process.env.MONGO_HOST,
   MONGO_USER: process.env.MONGO_USER,
   MONGO_PWD: process.env.MONGO_PWD,
   MONGO_DB_NAME: process.env.MONGO_DB_NAME,
@@ -22,13 +23,13 @@ const configMap = {
   IMG_SWEET_URL: process.env.IMG_SWEET_URL,
 };
 
-export default registerAs("app", () => {
+export default registerAs('app', () => {
   const level: string = process.env.NODE_ENV;
-  if (level === "test") {
-    return dotenv.config({ path: ".env.test" }).parsed;
+  if (level === 'test') {
+    return dotenv.config({ path: '.env.test' }).parsed;
   }
-  if (level === "dev") {
-    return dotenv.config({ path: ".env.dev" }).parsed;
+  if (level === 'dev') {
+    return dotenv.config({ path: '.env.dev' }).parsed;
   }
   return configMap;
 });
