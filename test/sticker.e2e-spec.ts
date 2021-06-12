@@ -1,15 +1,15 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { INestApplication } from "@nestjs/common";
-import { getConnectionToken } from "@nestjs/mongoose";
-import * as request from "supertest";
-import { Connection } from "mongoose";
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import { getConnectionToken } from '@nestjs/mongoose';
+import * as request from 'supertest';
+import { Connection } from 'mongoose';
 
-import { AppModule } from "./../src/app.module";
-import { createSticker } from "./constants";
+import { AppModule } from './../src/app.module';
+import { createSticker } from './constants';
 
 // mongoose e2e test with rollout https://dev.to/webeleon/unit-testing-nestjs-with-mongo-in-memory-54gd
 // https://github.com/nestjs/mongoose/issues/167
-describe("Sticker (e2e)", () => {
+describe('Sticker (e2e)', () => {
   let app: INestApplication;
   let connection: Connection;
 
@@ -25,8 +25,8 @@ describe("Sticker (e2e)", () => {
   });
 
   afterEach(async () => {
-    await connection.dropCollection("spots");
-    await connection.dropCollection("stickers");
+    await connection.dropCollection('spots');
+    await connection.dropCollection('stickers');
   });
 
   afterAll(async () => {
@@ -34,9 +34,9 @@ describe("Sticker (e2e)", () => {
     await app.close();
   });
 
-  it("/graphql (Mutation) createSticker", () => {
+  it('/graphql (Mutation) createSticker', () => {
     return request(app.getHttpServer())
-      .post("/graphql")
+      .post('/graphql')
       .send({
         query: createSticker.input,
       })

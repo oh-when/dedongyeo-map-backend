@@ -1,18 +1,13 @@
-import { Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
-import { PageInfo } from "./entities/pageinfo.entity";
+import { PageInfo } from './entities/pageinfo.entity';
 
 @Injectable()
 export class PageService {
   constructor(private configService: ConfigService) {}
 
-  getPageInfo(
-    size: number,
-    page: number,
-    count: number,
-    is_end: boolean
-  ): PageInfo {
+  getPageInfo(size: number, page: number, count: number, is_end: boolean): PageInfo {
     const maxKakaoItemSize: number = 45;
     const total_count: number = Math.min(maxKakaoItemSize, count);
     return {
