@@ -17,6 +17,7 @@ import {
   SpotNoNearException,
   SpotNotFoundException,
 } from 'src/shared/exceptions';
+import { StickerMode } from './dto/populate-sticker-input';
 
 @Injectable()
 export class SpotService {
@@ -166,10 +167,84 @@ export class SpotService {
       });
   }
 
-  async populateStickers(spot_id: Types.ObjectId): Promise<Sticker[]> {
-    // aggregate: https://gist.github.com/kdelemme/9659364#file-aggregate-js-L127
-    // lookup: https://github.com/Automattic/mongoose/issues/5090
-    // @TODO: 스티커 카운트 세기
+  async populateStickers(spot_id: Types.ObjectId, mode: StickerMode): Promise<any> {
+    if (mode === StickerMode.group) return this.groupPopulateStickers(spot_id);
+    if (mode === StickerMode.groupDetail) return this.groupDetailPopulateStickers(spot_id);
+    return this.defaultPopulateStickers(spot_id);
+  }
+
+  async groupPopulateStickers(spot_id: Types.ObjectId): Promise<any> {
+    return this.spotModel
+      .aggregate([
+        {
+          $match: { _id: spot_id },
+        },
+        {
+          $lookup: {
+            from: 'stickers',
+            localField: 'stickers',
+            foreignField: '_id',
+            as: 'stickers',
+          },
+        },
+        {
+          $unwind: '$stickers',
+        },
+        {
+          $group: {
+            _id: {
+              sticker_index: '$stickers.sticker_index',
+            },
+            total_count: {
+              $sum: {
+                $const: 1,
+              },
+            },
+          },
+        },
+      ])
+      .then(response => {
+        return response;
+      })
+      .catch(err => console.log(err));
+  }
+
+  async groupDetailPopulateStickers(spot_id: Types.ObjectId): Promise<Sticker[]> {
+    return this.spotModel
+      .aggregate([
+        {
+          $match: { _id: spot_id },
+        },
+        {
+          $lookup: {
+            from: 'stickers',
+            localField: 'stickers',
+            foreignField: '_id',
+            as: 'stickers',
+          },
+        },
+        {
+          $unwind: '$stickers',
+        },
+        {
+          $group: {
+            _id: {
+              sticker_index: '$stickers.sticker_index',
+            },
+            total_count: {
+              $sum: {
+                $const: 1,
+              },
+            },
+          },
+        },
+      ])
+      .then(response => {
+        return response[0].stickers;
+      });
+  }
+
+  async defaultPopulateStickers(spot_id: Types.ObjectId): Promise<Sticker[]> {
     return this.spotModel
       .aggregate([
         {
@@ -184,6 +259,8 @@ export class SpotService {
           },
         },
       ])
-      .then(response => response[0].stickers);
+      .then(response => {
+        return response[0].stickers;
+      });
   }
 }

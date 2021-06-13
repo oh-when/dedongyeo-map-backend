@@ -1,6 +1,5 @@
 import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
 import * as mongoose from 'mongoose';
-
 import { StickerService } from './sticker.service';
 import { Sticker, StickerDocument } from './entities/sticker.entity';
 import { CreateStickerInput, UpdateStickerInput } from './dto/sticker.input';

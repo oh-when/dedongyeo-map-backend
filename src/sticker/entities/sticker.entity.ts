@@ -1,4 +1,4 @@
-import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
+import { ObjectType, Field, registerEnumType, IntersectionType } from '@nestjs/graphql';
 import * as mongoose from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Spot } from '../../spot/entities/spot.entity';
@@ -45,6 +45,30 @@ export class Sticker {
   @Prop({ type: mongoose.Types.ObjectId, ref: 'Spot' })
   spot?: mongoose.Types.ObjectId | Spot;
 }
+
+@ObjectType({
+  description: '그룹 스티커 id 타입',
+})
+export class GroupStickerId {
+  @Field(() => Number, {
+    description: '스티커 번호, 0~11',
+  })
+  sticker_index?: number;
+}
+
+@ObjectType({
+  description: '스팟으로부터 스티커 정보를 받아올 때 사용하는 스티커 타입',
+})
+export class GroupedSticker {
+  @Field(() => GroupStickerId, { description: '그룹에 사용된 스티커 index' })
+  _id: GroupStickerId;
+
+  @Field(() => Number, { description: '그룹에 포함된 스티커 총 갯수' })
+  total_count?: number;
+}
+
+@ObjectType()
+export class PopulateStickerResult extends IntersectionType(GroupedSticker, Sticker) {}
 
 export type StickerDocument = Sticker & mongoose.Document;
 export const StickerSchema = SchemaFactory.createForClass(Sticker);
