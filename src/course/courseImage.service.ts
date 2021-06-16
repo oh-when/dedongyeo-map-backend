@@ -11,7 +11,6 @@ import { Spot } from '../spot/entities/spot.entity';
 import { CreateCourseImageInput } from './dto/create-course-image.input';
 import { MapBoxNoRoutesException } from 'src/shared/exceptions';
 
-
 @Injectable()
 export class CourseImageService {
   mapboxToken: string;

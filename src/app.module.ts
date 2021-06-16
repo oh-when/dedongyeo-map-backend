@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import * as path from 'path';
 
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GraphQLError, GraphQLFormattedError } from 'graphql';
 
@@ -57,7 +56,6 @@ import { AuthModule } from './auth/auth.module';
     SharedModule,
     AuthModule,
   ],
-  // controllers: [AppController],
   providers: [AppService, AppResolver, { provide: APP_FILTER, useClass: ExceptionsLoggerFilter }],
 })
 export class AppModule {}
