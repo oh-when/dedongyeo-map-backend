@@ -6,10 +6,20 @@ import { UserResolver } from './user.resolver';
 import * as bcrypt from 'bcrypt';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from '../auth/strategy/jwt.strategy';
+import { AppConfigService } from 'src/config/config.service';
+import { AppConfigModule } from 'src/config/config.module';
 
 @Module({
   imports: [
-    JwtModule.register({ secret: '1234' }),
+    JwtModule.registerAsync({
+      imports: [AppConfigModule],
+      useFactory: (cfg: AppConfigService) => {
+        return {
+          secret: cfg.get('JWT_SECRET_KEY'),
+        };
+      },
+      inject: [AppConfigService],
+    }),
     MongooseModule.forFeatureAsync([
       {
         name: User.name,

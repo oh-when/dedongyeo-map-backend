@@ -30,10 +30,10 @@ import { AuthModule } from './auth/auth.module';
       sortSchema: true,
       context: ({ req }) => ({ req }),
       formatError: (error: GraphQLError): GraphQLFormattedError => {
+        console.error(error);
         const graphQLFormattedError: GraphQLFormattedError = {
           message: error.extensions?.exception?.response?.message || error.message,
         };
-
         return graphQLFormattedError;
       },
     }),

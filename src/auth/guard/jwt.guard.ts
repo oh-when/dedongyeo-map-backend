@@ -13,7 +13,6 @@ export class JwtGuard extends AuthGuard('jwt') {
     const ctx = GqlExecutionContext.create(context);
     const request = ctx.getContext().req;
     const Authorization = request.get('Authorization');
-
     if (Authorization) {
       const token = Authorization.replace('Bearer ', '');
       const { _id }: JwtPayload = this.jwtService.verify(token);
