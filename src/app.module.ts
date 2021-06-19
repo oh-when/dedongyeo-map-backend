@@ -17,6 +17,7 @@ import { StickerModule } from './sticker/sticker.module';
 import { SharedModule } from './shared/shared.module';
 import { AppResolver } from './app.resolver';
 import { ExceptionsLoggerFilter } from './shared/exceptionsLogger.filter';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -29,10 +30,10 @@ import { ExceptionsLoggerFilter } from './shared/exceptionsLogger.filter';
       sortSchema: true,
       context: ({ req }) => ({ req }),
       formatError: (error: GraphQLError): GraphQLFormattedError => {
+        console.error(error);
         const graphQLFormattedError: GraphQLFormattedError = {
           message: error.extensions?.exception?.response?.message || error.message,
         };
-
         return graphQLFormattedError;
       },
     }),
@@ -53,6 +54,7 @@ import { ExceptionsLoggerFilter } from './shared/exceptionsLogger.filter';
     CourseModule,
     UserModule,
     SharedModule,
+    AuthModule,
   ],
   providers: [AppService, AppResolver, { provide: APP_FILTER, useClass: ExceptionsLoggerFilter }],
 })
