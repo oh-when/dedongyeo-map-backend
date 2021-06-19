@@ -9,7 +9,7 @@ import { UpdateCustomSpotInput } from './dto/update-custom-spot.input';
 import { SearchSpotDto } from '../spot/dto/search-spot.dto';
 import { Spot, SpotDocument } from '../spot/entities/spot.entity';
 import { Place } from '../place/place.entity';
-import { Sticker } from '../sticker/entities/sticker.entity';
+import { GroupedSticker, Sticker } from '../sticker/entities/sticker.entity';
 
 import {
   CustomSpotUpdateWhenPublicException,
@@ -167,9 +167,9 @@ export class SpotService {
       });
   }
 
-  async populateStickers(spot_id: Types.ObjectId, mode: StickerMode): Promise<any> {
+  async populateStickers(spot_id: Types.ObjectId, mode: StickerMode | undefined = undefined): Promise<any> {
     if (mode === StickerMode.group) return this.groupPopulateStickers(spot_id);
-    if (mode === StickerMode.groupDetail) return this.groupDetailPopulateStickers(spot_id);
+    // if (mode === StickerMode.groupDetail) return this.groupDetailPopulateStickers(spot_id);
     return this.defaultPopulateStickers(spot_id);
   }
 
@@ -203,46 +203,43 @@ export class SpotService {
           },
         },
       ])
-      .then(response => {
-        return response;
-      })
       .catch(err => console.log(err));
   }
 
-  async groupDetailPopulateStickers(spot_id: Types.ObjectId): Promise<Sticker[]> {
-    return this.spotModel
-      .aggregate([
-        {
-          $match: { _id: spot_id },
-        },
-        {
-          $lookup: {
-            from: 'stickers',
-            localField: 'stickers',
-            foreignField: '_id',
-            as: 'stickers',
-          },
-        },
-        {
-          $unwind: '$stickers',
-        },
-        {
-          $group: {
-            _id: {
-              sticker_index: '$stickers.sticker_index',
-            },
-            total_count: {
-              $sum: {
-                $const: 1,
-              },
-            },
-          },
-        },
-      ])
-      .then(response => {
-        return response[0].stickers;
-      });
-  }
+  // async groupDetailPopulateStickers(spot_id: Types.ObjectId): Promise<Sticker[]> {
+  //   return this.spotModel
+  //     .aggregate([
+  //       {
+  //         $match: { _id: spot_id },
+  //       },
+  //       {
+  //         $lookup: {
+  //           from: 'stickers',
+  //           localField: 'stickers',
+  //           foreignField: '_id',
+  //           as: 'stickers',
+  //         },
+  //       },
+  //       {
+  //         $unwind: '$stickers',
+  //       },
+  //       {
+  //         $group: {
+  //           _id: {
+  //             sticker_index: '$stickers.sticker_index',
+  //           },
+  //           total_count: {
+  //             $sum: {
+  //               $const: 1,
+  //             },
+  //           },
+  //         },
+  //       },
+  //     ])
+  //     .then(response => {
+  //       return response[0].stickers;
+  //     });
+  // }
 
   async defaultPopulateStickers(spot_id: Types.ObjectId): Promise<Sticker[]> {
     return this.spotModel

@@ -2,12 +2,12 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { SpotService } from '../spot/spot.service';
 import { Spot, SpotDocument } from '../spot/entities/spot.entity';
-import { GroupedSticker, PopulateStickerResult, Sticker } from '../sticker/entities/sticker.entity';
+import { GroupedSticker, Sticker } from '../sticker/entities/sticker.entity';
 import { CreateCustomSpotInput } from './dto/create-custom-spot.input';
 import { UpdateCustomSpotInput } from './dto/update-custom-spot.input';
 import { DeleteSpotDto } from '../spot/dto/delete.spot.dto';
 import { SearchSpotDto } from './dto/search-spot.dto';
-import { PopulateStickerInput } from './dto/populate-sticker-input';
+import { PopulateStickerInput, StickerMode } from './dto/populate-sticker-input';
 
 @Resolver(() => Spot)
 export class SpotResolver {
@@ -61,19 +61,28 @@ export class SpotResolver {
     return result;
   }
 
-  @ResolveField(() => [PopulateStickerResult], {
+  @ResolveField(() => [Sticker], {
     description: '해당 설정을 통해 스티커들 정보를 자세히 받아올 수 있습니다.',
   })
   async stickers(
     @Parent() spot: SpotDocument,
+    @Args({ name: 'populate', nullable: true, defaultValue: false })
+    populate?: Boolean,
+  ) {
+    if (populate) {
+      return await this.spotService.populateStickers(spot._id);
+    }
+    return spot.stickers;
+  }
+
+  @ResolveField(() => [GroupedSticker], {
+    description: '스티커 index에 따라서 그룹된 정보를 자세히 받아올 수 있습니다.',
+  })
+  async groupStickers(
+    @Parent() spot: SpotDocument,
     @Args({ name: 'PopulateStickerInput', nullable: true })
     populateStickerInput?: PopulateStickerInput,
   ) {
-    if (populateStickerInput?.populate) {
-      const tmp = await this.spotService.populateStickers(spot._id, populateStickerInput.mode);
-      console.log(tmp);
-      return tmp;
-    }
-    return spot.stickers;
+    return await this.spotService.populateStickers(spot._id, populateStickerInput.mode);
   }
 }

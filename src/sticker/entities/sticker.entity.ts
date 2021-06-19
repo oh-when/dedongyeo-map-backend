@@ -67,8 +67,5 @@ export class GroupedSticker {
   total_count?: number;
 }
 
-@ObjectType()
-export class PopulateStickerResult extends IntersectionType(GroupedSticker, Sticker) {}
-
 export type StickerDocument = Sticker & mongoose.Document;
 export const StickerSchema = SchemaFactory.createForClass(Sticker);

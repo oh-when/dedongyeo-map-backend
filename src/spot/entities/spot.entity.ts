@@ -2,7 +2,7 @@ import { ObjectType, Field, Float } from '@nestjs/graphql';
 import * as mongoose from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import { PopulateStickerResult } from '../../sticker/entities/sticker.entity';
+import { Sticker } from '../../sticker/entities/sticker.entity';
 import { PageInfo } from '../../shared/entities/pageinfo.entity';
 
 @ObjectType({
@@ -17,9 +17,9 @@ export class Spot {
   @Prop({ required: true, unique: true })
   place_id: string;
 
-  @Field(() => [PopulateStickerResult], { description: 'list of stickers' })
+  @Field(() => [Sticker], { description: 'list of stickers' })
   @Prop({ type: [mongoose.Types.ObjectId], ref: 'Sticker' })
-  stickers: mongoose.Types.ObjectId[] | PopulateStickerResult[];
+  stickers: mongoose.Types.ObjectId[] | Sticker[];
 
   @Field(() => String)
   @Prop({ required: true, text: true }) // {text : true} for indexing
