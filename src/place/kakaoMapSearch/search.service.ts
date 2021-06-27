@@ -49,15 +49,16 @@ export class SearchService {
   }
 
   async getIdenticalPlace(createSpotInput: CreateSpotInput): Promise<Place | null> {
-    return this.searchByKeyword({
+    return await this.searchByKeyword({
       query: createSpotInput.place_name,
       x: createSpotInput.x,
       y: createSpotInput.y,
-      radius: 1,
+      radius: 100,
       sort: SortType.distance,
     })
       .then(({ places }) => places[0])
       .catch(error => {
+        console.log(error);
         throw new PlaceNotFoundIdenticalException(createSpotInput.place_name);
       });
   }
