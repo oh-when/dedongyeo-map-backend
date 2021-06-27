@@ -12,6 +12,7 @@ import { Place } from '../place/place.entity';
 import { GroupedSticker, Sticker } from '../sticker/entities/sticker.entity';
 
 import {
+  CustomSpotNotFoundException,
   CustomSpotUpdateWhenPublicException,
   CustomSpotValidationException,
   SpotNoNearException,
@@ -71,8 +72,9 @@ export class SpotService {
   async updateCustomSpot(updateCustomSpotInput: UpdateCustomSpotInput): Promise<Spot> {
     if (!updateCustomSpotInput.is_custom) throw new CustomSpotValidationException();
 
-    const customSpot: SpotDocument = await this.findOne(updateCustomSpotInput._id);
-
+    const spotId = updateCustomSpotInput._id;
+    const customSpot: SpotDocument = await this.findOne(spotId);
+    if (customSpot == null) throw new CustomSpotNotFoundException(spotId);
     if (customSpot.is_custom_share) throw new CustomSpotUpdateWhenPublicException();
 
     updateCustomSpotInput['location'] = {
@@ -100,9 +102,8 @@ export class SpotService {
   }
 
   async validateCustomSpot(spotId: mongoose.Types.ObjectId): Promise<boolean> {
-    // validate custom spot before edit / delete
-
     const spot = await this.findOne(spotId);
+    if (spot == null) throw new CustomSpotNotFoundException(spotId);
     return spot?.is_custom && !spot.is_custom_share;
     // TODO: return spot?.is_custom && !spot.is_custom_share && spot.created_by == currentUser;
   }
