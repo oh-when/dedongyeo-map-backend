@@ -158,7 +158,7 @@ type Mutation {
   updateSticker(updateStickerInput: UpdateStickerInput!): Sticker!
 }
 
-"""페이지네이션 정보, """
+"""페이지네이션 정보"""
 type PageInfo {
   """현재 페이지 번호"""
   cur_page: Int!
@@ -166,10 +166,12 @@ type PageInfo {
   """현재 페이지가 마지막 페이지인지 여부, 값이 false면 page를 증가시켜 다음 페이지를 요청할 수 있음"""
   is_end: Boolean!
 
-  """총 문서 수"""
+  """검색된 문서 수"""
   total_count: Int!
 
-  """노출 가능 페이지 수"""
+  """
+  페이지 수(카카오 api가 최대 45개의 문서만 검색 가능하기 때문에 total_count와 매칭되지 않을 수 있다. https://devtalk.kakao.com/t/pageable-count/88418)
+  """
   total_page_count: Int!
 }
 
@@ -215,28 +217,50 @@ type Query {
   course(courseInput: CourseInput!): Course!
   courses: [Course!]!
 
+  """근처에 있는 spot을 검색합니다."""
+  getNearSpots(searchSpotDto: SearchNearSpotDto): [Spot!]!
+
   """
   키워드로 위치 정보를 확인합니다. 
   내부적으로 카카오 API를 요청합니다.
   """
-  places(filters: KeywordSearchDto!): PaginatedPlace!
+  places(keywordSearchDto: KeywordSearchDto!): PaginatedPlace!
 
-  """searchSpotDto에 매칭되는 스팟들을 반환합니다."""
+  """스팟들을 반환합니다."""
   spots(searchSpotDto: SearchSpotDto): [Spot!]!
   sticker(id: String!): Sticker!
   stickers: [Sticker!]!
 }
 
-"""스팟 검색으로, 해당 필드가 비워져 있을 경우 db에 저장된 모든 스팟을 반환합니다."""
-input SearchSpotDto {
+"""주어진 x,y 기준으로 근처 spot을 검색합니다."""
+input SearchNearSpotDto {
+  """비워질 경우 x,y 기준으로만 검색됩니다."""
   keyword: String
+
+  """결과 페이지 번호"""
+  page: Int = 1
 
   """
   단위 meter, 0~20000 사이의 값으로 중심 좌표부터의 반경거리. 특정 지역을 중심으로 검색하려고 할 경우 중심좌표로 쓰일 x,y와 함께 사용.
   """
   radius: Int = 1000
+
+  """한 페이지에 보여질 문서의 개수, 1~15 사이의 값"""
+  size: Int = 15
   x: Float
   y: Float
+}
+
+"""키워드 기반으로 spot을 검색합니다. """
+input SearchSpotDto {
+  """비워질 경우 필터링 없이 검색됩니다."""
+  keyword: String
+
+  """결과 페이지 번호"""
+  page: Int = 1
+
+  """한 페이지에 보여질 문서의 개수, 1~15 사이의 값"""
+  size: Int = 15
 }
 
 enum SortType {
