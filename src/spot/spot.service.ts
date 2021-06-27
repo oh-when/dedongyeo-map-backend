@@ -6,7 +6,7 @@ import { SearchService } from '../place/kakaoMapSearch/search.service';
 import { CreateSpotInput } from '../spot/dto/create-spot.input';
 import { CreateCustomSpotInput } from './dto/create-custom-spot.input';
 import { UpdateCustomSpotInput } from './dto/update-custom-spot.input';
-import { SearchSpotDto } from '../spot/dto/search-spot.dto';
+import { SearchNearSpotDto, SearchSpotDto } from '../spot/dto/search-spot.dto';
 import { Spot, SpotDocument } from '../spot/entities/spot.entity';
 import { Place } from '../place/place.entity';
 import { GroupedSticker, Sticker } from '../sticker/entities/sticker.entity';
@@ -130,7 +130,7 @@ export class SpotService {
       });
   }
 
-  async getNearSpots(searchSpotDto: SearchSpotDto): Promise<Spot[]> {
+  async getNearSpots(searchSpotDto: SearchNearSpotDto): Promise<Spot[]> {
     const maxNumSpots: number = 15;
     const maxDistance: number = searchSpotDto.radius;
     const coordinates = [searchSpotDto.x, searchSpotDto.y];
@@ -156,7 +156,7 @@ export class SpotService {
       });
   }
 
-  async getNearSpotsByKeyword(searchSpotDto: SearchSpotDto): Promise<Spot[]> {
+  async getNearSpotsByKeyword(searchSpotDto: SearchNearSpotDto): Promise<Spot[]> {
     const maxNumSpots: number = 15;
     const maxDistance: number = searchSpotDto.radius;
     const place_name: RegExp = new RegExp(searchSpotDto.keyword);

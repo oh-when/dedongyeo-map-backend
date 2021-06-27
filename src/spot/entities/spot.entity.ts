@@ -98,10 +98,10 @@ export class Spot {
   description: '페이지네이션 정보를 포함한 spot 정보',
 })
 export class PaginatedSpot {
-  @Field(() => PageInfo, { description: '카카오 장소 페이지네이션 정보' })
+  @Field(() => PageInfo, { description: '페이지네이션 정보' })
   pageInfo: PageInfo;
 
-  @Field(() => [Spot], { description: '카카오 장소 정보들' })
+  @Field(() => [Spot], { description: 'Spot 정보들' })
   spots: Spot[];
 }
 

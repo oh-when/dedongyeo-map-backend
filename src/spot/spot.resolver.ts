@@ -5,7 +5,7 @@ import { GroupedSticker, Sticker } from '../sticker/entities/sticker.entity';
 import { CreateCustomSpotInput } from './dto/create-custom-spot.input';
 import { UpdateCustomSpotInput } from './dto/update-custom-spot.input';
 import { DeleteSpotDto } from '../spot/dto/delete.spot.dto';
-import { SearchSpotDto } from './dto/search-spot.dto';
+import { SearchNearSpotDto, SearchSpotDto } from './dto/search-spot.dto';
 import { PopulateStickerInput, StickerMode } from './dto/populate-sticker-input';
 import * as mongoose from 'mongoose';
 
@@ -15,26 +15,30 @@ export class SpotResolver {
 
   @Query(() => [Spot], {
     name: 'spots',
-    description: 'searchSpotDto에 매칭되는 스팟들을 반환합니다.',
+    description: '스팟들을 반환합니다.',
   })
   async findAll(
     @Args({ name: 'searchSpotDto', nullable: true })
     searchSpotDto: SearchSpotDto,
   ): Promise<Spot[]> {
-    if (searchSpotDto === undefined) {
-      return await this.spotService.findAll();
-    }
-
     if ('keyword' in searchSpotDto) {
-      if ('x' in searchSpotDto && 'y' in searchSpotDto) {
-        return await this.spotService.getNearSpotsByKeyword(searchSpotDto);
-      }
-      // x,y가 없을 경우
       return await this.spotService.getByKeyword(searchSpotDto);
     }
+    return await this.spotService.findAll();
+  }
 
-    // 키워드가 없을 경우
-    return await this.spotService.getNearSpots(searchSpotDto);
+  @Query(() => [Spot], {
+    name: 'getNearSpots',
+    description: '근처에 있는 spot을 검색합니다.',
+  })
+  async getNearSpots(
+    @Args({ name: 'searchSpotDto', nullable: true })
+    searchNearSpotDto: SearchNearSpotDto,
+  ): Promise<Spot[]> {
+    if ('keyword' in searchNearSpotDto) {
+      return await this.spotService.getNearSpotsByKeyword(searchNearSpotDto);
+    }
+    return await this.spotService.getNearSpots(searchNearSpotDto);
   }
 
   @Mutation(() => DeleteSpotDto, {

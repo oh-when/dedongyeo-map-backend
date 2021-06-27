@@ -1,17 +1,26 @@
 import { InputType, Int, Float, Field } from '@nestjs/graphql';
+import { PageSearchDto } from 'src/shared/entities/pageinfo.entity';
 
 @InputType({
-  description: '스팟 검색으로, 해당 필드가 비워져 있을 경우 db에 저장된 모든 스팟을 반환합니다.',
+  description: '키워드 기반으로 spot을 검색합니다. ',
 })
-export class SearchSpotDto {
-  @Field(() => String, { nullable: true })
+export class SearchSpotDto extends PageSearchDto {
+  @Field(() => String, { description: '비워질 경우 필터링 없이 검색됩니다.', nullable: true })
+  keyword?: string;
+}
+
+@InputType({
+  description: '주어진 x,y 기준으로 근처 spot을 검색합니다.',
+})
+export class SearchNearSpotDto extends PageSearchDto {
+  @Field(() => String, { description: '비워질 경우 x,y 기준으로만 검색됩니다.', nullable: true })
   keyword?: string;
 
   @Field(() => Float, { nullable: true })
-  x?: number;
+  x: number;
 
   @Field(() => Float, { nullable: true })
-  y?: number;
+  y: number;
 
   @Field(() => Int, {
     description:
