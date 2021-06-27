@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Mongoose, Types } from 'mongoose';
+import * as mongoose from 'mongoose';
 import { SearchService } from '../place/kakaoMapSearch/search.service';
 
 import { CreateSpotInput } from '../spot/dto/create-spot.input';
@@ -18,11 +18,12 @@ import {
   SpotNotFoundException,
 } from 'src/shared/exceptions';
 import { StickerMode } from './dto/populate-sticker-input';
+import { DeleteSpotDto } from './dto/delete.spot.dto';
 
 @Injectable()
 export class SpotService {
   constructor(
-    @InjectModel(Spot.name) private spotModel: Model<SpotDocument>,
+    @InjectModel(Spot.name) private spotModel: mongoose.Model<SpotDocument>,
     private readonly searchService: SearchService,
   ) {}
 
@@ -44,7 +45,7 @@ export class SpotService {
     );
   }
 
-  async appendSticker(spotId: Types.ObjectId, stickerId: Types.ObjectId): Promise<Spot> {
+  async appendSticker(spotId: mongoose.Types.ObjectId, stickerId: mongoose.Types.ObjectId): Promise<Spot> {
     return this.spotModel.findOneAndUpdate({ _id: spotId }, { $push: { stickers: stickerId } });
   }
 
@@ -85,17 +86,32 @@ export class SpotService {
     );
   }
 
-  async findOne(_id: Types.ObjectId): Promise<SpotDocument> {
+  async findOne(_id: mongoose.Types.ObjectId): Promise<SpotDocument> {
     return this.spotModel.findById(_id).exec();
   }
 
-  async findAll(ids: Types.ObjectId[] | null = null): Promise<Spot[]> {
+  async findAll(ids: mongoose.Types.ObjectId[] | null = null): Promise<Spot[]> {
     const filters = ids ? { _id: { $in: ids } } : {};
     return this.spotModel.find(filters).exec();
   }
 
-  async remove(place_id: string) {
-    return this.spotModel.remove({ place_id }).exec();
+  async remove(spotId: mongoose.Types.ObjectId): Promise<DeleteSpotDto> {
+    return this.spotModel.remove({ _id: spotId }).exec();
+  }
+
+  async validateCustomSpot(spotId: mongoose.Types.ObjectId): Promise<boolean> {
+    // validate custom spot before edit / delete
+
+    const spot = await this.findOne(spotId);
+    return spot?.is_custom && !spot.is_custom_share;
+    // TODO: return spot?.is_custom && !spot.is_custom_share && spot.created_by == currentUser;
+  }
+
+  async removeCustomSpot(spotId: mongoose.Types.ObjectId): Promise<DeleteSpotDto> {
+    if (await this.validateCustomSpot(spotId)) {
+      return this.spotModel.remove({ _id: spotId }).exec();
+    }
+    return { ok: 0, n: 0 };
   }
 
   async getByKeyword(searchSpotDto: SearchSpotDto): Promise<Spot[]> {
@@ -167,13 +183,13 @@ export class SpotService {
       });
   }
 
-  async populateStickers(spot_id: Types.ObjectId, mode: StickerMode | undefined = undefined): Promise<any> {
+  async populateStickers(spot_id: mongoose.Types.ObjectId, mode: StickerMode | undefined = undefined): Promise<any> {
     if (mode === StickerMode.group) return this.groupPopulateStickers(spot_id);
     // if (mode === StickerMode.groupDetail) return this.groupDetailPopulateStickers(spot_id);
     return this.defaultPopulateStickers(spot_id);
   }
 
-  async groupPopulateStickers(spot_id: Types.ObjectId): Promise<any> {
+  async groupPopulateStickers(spot_id: mongoose.Types.ObjectId): Promise<any> {
     return this.spotModel
       .aggregate([
         {
@@ -206,7 +222,7 @@ export class SpotService {
       .catch(err => console.log(err));
   }
 
-  // async groupDetailPopulateStickers(spot_id: Types.ObjectId): Promise<Sticker[]> {
+  // async groupDetailPopulateStickers(spot_id: mongoose.Types.ObjectId): Promise<Sticker[]> {
   //   return this.spotModel
   //     .aggregate([
   //       {
@@ -241,7 +257,7 @@ export class SpotService {
   //     });
   // }
 
-  async defaultPopulateStickers(spot_id: Types.ObjectId): Promise<Sticker[]> {
+  async defaultPopulateStickers(spot_id: mongoose.Types.ObjectId): Promise<Sticker[]> {
     return this.spotModel
       .aggregate([
         {

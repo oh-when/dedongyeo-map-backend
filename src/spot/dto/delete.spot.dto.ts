@@ -1,13 +1,10 @@
-import { ObjectType, Int, Float, Field } from '@nestjs/graphql';
+import { ObjectType, Int, Field } from '@nestjs/graphql';
 
 @ObjectType()
 export class DeleteSpotDto {
-  @Field(type => Int)
+  @Field(type => Int, { description: '1 if no errors occurred' })
   ok: number;
 
-  @Field(type => Int)
+  @Field(type => Int, { description: 'the number of documents deleted. Equal to deletedCount.' })
   n: number;
-
-  @Field(type => Int)
-  deletedCount: number;
 }

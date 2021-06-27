@@ -88,6 +88,10 @@ export class Spot {
   @Field(type => Boolean, { defaultValue: false, nullable: true })
   @Prop()
   is_custom_share?: boolean;
+
+  // @Field(() => User, { description: '커스텀 스팟 생성한 User Id' })
+  // @Prop({ type: mongoose.Types.ObjectId, ref: 'User' })
+  // created_by: mongoose.Types.ObjectId;
 }
 
 @ObjectType({

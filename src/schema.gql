@@ -87,8 +87,10 @@ input CreateStickerInput {
 }
 
 type DeleteSpotDto {
-  deletedCount: Int!
+  """the number of documents deleted. Equal to deletedCount."""
   n: Int!
+
+  """1 if no errors occurred"""
   ok: Int!
 }
 
@@ -141,10 +143,17 @@ type Mutation {
   """dummy 데이터를 생성합니다."""
   dummy(keyword: String!): Int!
 
-  """(For Debugging) 스팟 하나 삭제"""
-  removeSpot(id: String!): DeleteSpotDto!
+  """
+  커스텀 스팟을 삭제합니다. is_custom==true && is_custom_share==false && created_by==current_user 때만 삭제 가능
+  """
+  removeCustomSpot(spotId: String!): DeleteSpotDto!
 
-  """커스텀 스팟을 업데이트합니다."""
+  """(For Debugging) 스팟을 삭제합니다"""
+  removeSpot(spotId: String!): DeleteSpotDto!
+
+  """
+  커스텀 스팟을 업데이트합니다. 정책상 is_custom==true && is_custom_share==false && created_by==current_user 때만 삭제 가능
+  """
   updateCustomSpot(updateCustomSpotInput: UpdateCustomSpotInput!): Spot!
   updateSticker(updateStickerInput: UpdateStickerInput!): Sticker!
 }

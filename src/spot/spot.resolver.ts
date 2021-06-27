@@ -1,4 +1,3 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
 import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { SpotService } from '../spot/spot.service';
 import { Spot, SpotDocument } from '../spot/entities/spot.entity';
@@ -8,6 +7,7 @@ import { UpdateCustomSpotInput } from './dto/update-custom-spot.input';
 import { DeleteSpotDto } from '../spot/dto/delete.spot.dto';
 import { SearchSpotDto } from './dto/search-spot.dto';
 import { PopulateStickerInput, StickerMode } from './dto/populate-sticker-input';
+import * as mongoose from 'mongoose';
 
 @Resolver(() => Spot)
 export class SpotResolver {
@@ -38,10 +38,11 @@ export class SpotResolver {
   }
 
   @Mutation(() => DeleteSpotDto, {
-    description: '(For Debugging) 스팟 하나 삭제',
+    name: 'removeSpot',
+    description: '(For Debugging) 스팟을 삭제합니다',
   })
-  async removeSpot(@Args('id', { type: () => String }) id: string) {
-    return await this.spotService.remove(id);
+  async removeSpot(@Args('spotId', { type: () => String }) spotId: mongoose.Types.ObjectId): Promise<DeleteSpotDto> {
+    return await this.spotService.remove(spotId);
   }
 
   @Mutation(() => Spot, {
@@ -54,11 +55,23 @@ export class SpotResolver {
 
   @Mutation(() => Spot, {
     name: 'updateCustomSpot',
-    description: '커스텀 스팟을 업데이트합니다.',
+    description:
+      '커스텀 스팟을 업데이트합니다. 정책상 is_custom==true && is_custom_share==false && created_by==current_user 때만 삭제 가능',
   })
   async updateCustomSpot(@Args('updateCustomSpotInput') updateCustomSpotInput: UpdateCustomSpotInput): Promise<Spot> {
     const result = await this.spotService.updateCustomSpot(updateCustomSpotInput);
     return result;
+  }
+
+  @Mutation(() => DeleteSpotDto, {
+    name: 'removeCustomSpot',
+    description:
+      '커스텀 스팟을 삭제합니다. is_custom==true && is_custom_share==false && created_by==current_user 때만 삭제 가능',
+  })
+  async removeCustomSpot(
+    @Args('spotId', { type: () => String }) spotId: mongoose.Types.ObjectId,
+  ): Promise<DeleteSpotDto> {
+    return await this.spotService.removeCustomSpot(spotId);
   }
 
   @ResolveField(() => [Sticker], {
