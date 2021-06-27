@@ -28,13 +28,13 @@ input CourseInput {
 
 input CreateCourseImageInput {
   """이미지 세로 사이즈"""
-  height: Float = 700
+  height: Int = 700
 
   """이미지 테마"""
   theme: ImageThemeType = street
 
   """이미지 가로 사이즈"""
-  width: Float = 700
+  width: Int = 700
 }
 
 input CreateCourseInput {
@@ -78,10 +78,10 @@ input CreateStickerInput {
   road_address_name: String
 
   """스티커 번호, 0~11"""
-  sticker_index: Float!
+  sticker_index: Int!
 
   """스티커 당도 퍼센트"""
-  sweet_percent: Float!
+  sweet_percent: Int!
   x: Float!
   y: Float!
 }
@@ -95,7 +95,7 @@ type DeleteSpotDto {
 """그룹 스티커 id 타입"""
 type GroupStickerId {
   """스티커 번호, 0~11"""
-  sticker_index: Float!
+  sticker_index: Int!
 }
 
 """스팟으로부터 스티커 정보를 받아올 때 사용하는 스티커 타입"""
@@ -104,7 +104,7 @@ type GroupedSticker {
   _id: GroupStickerId!
 
   """그룹에 포함된 스티커 총 갯수"""
-  total_count: Float!
+  total_count: Int!
 }
 
 enum ImageThemeType {
@@ -139,7 +139,7 @@ type Mutation {
   createSticker(createStickerInput: CreateStickerInput!): Sticker!
 
   """dummy 데이터를 생성합니다."""
-  dummy(keyword: String!): Float!
+  dummy(keyword: String!): Int!
 
   """(For Debugging) 스팟 하나 삭제"""
   removeSpot(id: String!): DeleteSpotDto!
@@ -152,16 +152,16 @@ type Mutation {
 """페이지네이션 정보, """
 type PageInfo {
   """현재 페이지 번호"""
-  cur_page: Float!
+  cur_page: Int!
 
   """현재 페이지가 마지막 페이지인지 여부, 값이 false면 page를 증가시켜 다음 페이지를 요청할 수 있음"""
   is_end: Boolean!
 
   """총 문서 수"""
-  total_count: Float!
+  total_count: Int!
 
   """노출 가능 페이지 수"""
-  total_page_count: Float!
+  total_page_count: Int!
 }
 
 """페이지네이션 정보를 포함한 place 정보"""
@@ -275,10 +275,10 @@ type Sticker {
   spot(populate: Boolean!): Spot
 
   """스티커 번호, 0~11"""
-  sticker_index: Float!
+  sticker_index: Int!
 
   """스티커 당도 퍼센트"""
-  sweet_percent: Float!
+  sweet_percent: Int!
 }
 
 enum StickerMode {

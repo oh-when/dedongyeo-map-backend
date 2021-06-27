@@ -1,4 +1,4 @@
-import { InputType, Field, registerEnumType } from '@nestjs/graphql';
+import { InputType, Field, registerEnumType, Int } from '@nestjs/graphql';
 import { Types } from 'mongoose';
 
 export enum ImageThemeType {
@@ -20,14 +20,14 @@ export class CreateCourseImageInput {
   })
   theme?: ImageThemeType;
 
-  @Field(() => Number, {
+  @Field(() => Int, {
     description: '이미지 가로 사이즈',
     nullable: true,
     defaultValue: 700,
   })
   width?: number;
 
-  @Field(() => Number, {
+  @Field(() => Int, {
     description: '이미지 세로 사이즈',
     nullable: true,
     defaultValue: 700,

@@ -1,4 +1,4 @@
-import { ObjectType, Field, registerEnumType, IntersectionType } from '@nestjs/graphql';
+import { ObjectType, Field, registerEnumType, IntersectionType, Int } from '@nestjs/graphql';
 import * as mongoose from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Spot } from '../../spot/entities/spot.entity';
@@ -22,13 +22,13 @@ export class Sticker {
   // @Prop({ type: [mongoose.Types.ObjectId], ref: "User" })
   // partners: mongoose.Types.ObjectId[];
 
-  @Field(() => Number, {
+  @Field(() => Int, {
     description: '스티커 번호, 0~11',
   })
   @Prop({ required: true })
   sticker_index: number;
 
-  @Field(() => Number, {
+  @Field(() => Int, {
     description: '스티커 당도 퍼센트',
   })
   @Prop({ required: true })
@@ -50,7 +50,7 @@ export class Sticker {
   description: '그룹 스티커 id 타입',
 })
 export class GroupStickerId {
-  @Field(() => Number, {
+  @Field(() => Int, {
     description: '스티커 번호, 0~11',
   })
   sticker_index?: number;
@@ -63,7 +63,7 @@ export class GroupedSticker {
   @Field(() => GroupStickerId, { description: '그룹에 사용된 스티커 index' })
   _id: GroupStickerId;
 
-  @Field(() => Number, { description: '그룹에 포함된 스티커 총 갯수' })
+  @Field(() => Int, { description: '그룹에 포함된 스티커 총 갯수' })
   total_count?: number;
 }
 

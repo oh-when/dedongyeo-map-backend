@@ -1,10 +1,10 @@
-import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Int } from '@nestjs/graphql';
 import { AppService } from './app.service';
 
 @Resolver()
 export class AppResolver {
   constructor(private readonly appService: AppService) {}
-  @Mutation(() => Number, {
+  @Mutation(() => Int, {
     name: 'dummy',
     description: 'dummy 데이터를 생성합니다.',
   })

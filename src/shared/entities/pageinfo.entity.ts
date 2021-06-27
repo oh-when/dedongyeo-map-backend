@@ -1,10 +1,10 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType({
   description: '페이지네이션 정보, ',
 })
 export class PageInfo {
-  @Field(() => Number, { description: '총 문서 수' })
+  @Field(() => Int, { description: '총 문서 수' })
   total_count: number;
 
   @Field(() => Boolean, {
@@ -12,11 +12,11 @@ export class PageInfo {
   })
   is_end: boolean;
 
-  @Field(() => Number, {
+  @Field(() => Int, {
     description: '노출 가능 페이지 수',
   })
   total_page_count: number;
 
-  @Field(() => Number, { description: '현재 페이지 번호' })
+  @Field(() => Int, { description: '현재 페이지 번호' })
   cur_page: number;
 }

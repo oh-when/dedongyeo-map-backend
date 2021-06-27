@@ -1,4 +1,4 @@
-import { InputType, Field, IntersectionType } from '@nestjs/graphql';
+import { InputType, Field, IntersectionType, Int } from '@nestjs/graphql';
 import * as mongoose from 'mongoose';
 import { Min, Max, IsInt, IsIn } from 'class-validator';
 import { CreateSpotInput } from '../../spot/dto/create-spot.input';
@@ -15,7 +15,7 @@ export class StickerInput {
   // })
   // partners: mongoose.Types.ObjectId[];
 
-  @Field(() => Number, {
+  @Field(() => Int, {
     description: '스티커 번호, 0~11',
   })
   @Min(0, {
@@ -27,7 +27,7 @@ export class StickerInput {
   @IsInt()
   sticker_index: number;
 
-  @Field(() => Number, {
+  @Field(() => Int, {
     description: '스티커 당도 퍼센트',
   })
   @IsIn([0, 30, 50, 70, 100], {
