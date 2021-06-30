@@ -38,7 +38,7 @@ export class SearchService {
     const pageInfo: PageInfo = this.pageService.getPageInfoForKakao(size, page, total_count, is_end);
 
     const paginatedPlace: PaginatedPlace = {
-      pageInfo,
+      ...pageInfo,
       places: responseData.documents,
     };
 

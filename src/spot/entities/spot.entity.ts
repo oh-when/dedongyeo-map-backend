@@ -97,10 +97,7 @@ export class Spot {
 @ObjectType({
   description: '페이지네이션 정보를 포함한 spot 정보',
 })
-export class PaginatedSpot {
-  @Field(() => PageInfo, { description: '페이지네이션 정보' })
-  pageInfo: PageInfo;
-
+export class PaginatedSpot extends PageInfo {
   @Field(() => [Spot], { description: 'Spot 정보들' })
   spots: Spot[];
 }

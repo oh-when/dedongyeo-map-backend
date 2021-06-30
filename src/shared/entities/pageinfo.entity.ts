@@ -1,6 +1,9 @@
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { Max, Min } from 'class-validator';
 
+export const maxPageLimit: number = 100;
+export const maxKakaoPlaceLimit: number = 15;
+
 @ObjectType({
   description: '페이지네이션 정보',
 })
@@ -36,11 +39,25 @@ export class PageSearchDto {
   page?: number;
 
   @Field(() => Int, {
-    description: '한 페이지에 보여질 문서의 개수, 1~15 사이의 값',
+    description: `한 페이지에 보여질 문서의 개수, 1~${maxKakaoPlaceLimit} 사이의 값`,
     nullable: true,
-    defaultValue: 15,
+    defaultValue: maxPageLimit,
   })
   @Min(1)
-  @Max(15)
+  @Max(maxPageLimit)
+  size?: number;
+}
+
+@InputType({
+  description: '카카오 place 페이지네이션 dto',
+})
+export class KakaoPageSearchDto extends PageSearchDto {
+  @Field(() => Int, {
+    description: `한 페이지에 보여질 문서의 개수, 1~${maxKakaoPlaceLimit} 사이의 값`,
+    nullable: true,
+    defaultValue: maxKakaoPlaceLimit,
+  })
+  @Min(1)
+  @Max(maxKakaoPlaceLimit)
   size?: number;
 }

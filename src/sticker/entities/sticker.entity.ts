@@ -46,26 +46,5 @@ export class Sticker {
   spot?: mongoose.Types.ObjectId | Spot;
 }
 
-@ObjectType({
-  description: '그룹 스티커 id 타입',
-})
-export class GroupStickerId {
-  @Field(() => Int, {
-    description: '스티커 번호, 0~11',
-  })
-  sticker_index?: number;
-}
-
-@ObjectType({
-  description: '스팟으로부터 스티커 정보를 받아올 때 사용하는 스티커 타입',
-})
-export class GroupedSticker {
-  @Field(() => GroupStickerId, { description: '그룹에 사용된 스티커 index' })
-  _id: GroupStickerId;
-
-  @Field(() => Int, { description: '그룹에 포함된 스티커 총 갯수' })
-  total_count?: number;
-}
-
 export type StickerDocument = Sticker & mongoose.Document;
 export const StickerSchema = SchemaFactory.createForClass(Sticker);

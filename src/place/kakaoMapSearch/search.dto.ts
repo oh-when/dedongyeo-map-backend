@@ -1,5 +1,5 @@
 import { Field, Float, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
-import { PageSearchDto } from 'src/shared/entities/pageinfo.entity';
+import { KakaoPageSearchDto } from 'src/shared/entities/pageinfo.entity';
 
 export enum SortType {
   distance = 'distance',
@@ -14,7 +14,7 @@ registerEnumType(SortType, {
 @InputType({
   description: 'SortType은 정확도(accuracy)가 기본이며, 거리순(distance) 정렬을 원할 경우 x,y는 필수 입니다.',
 })
-export class KeywordSearchDto extends PageSearchDto {
+export class KeywordSearchDto extends KakaoPageSearchDto {
   @Field(() => String)
   query: string;
 

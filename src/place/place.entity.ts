@@ -1,4 +1,4 @@
-import { Field, ObjectType, Float } from '@nestjs/graphql';
+import { Field, ObjectType, Float, IntersectionType } from '@nestjs/graphql';
 import { PageInfo } from '../shared/entities/pageinfo.entity';
 
 // https://developers.kakao.com/docs/latest/ko/local/dev-guide#search-by-keyword
@@ -44,12 +44,9 @@ export class Place {
 }
 
 @ObjectType({
-  description: '페이지네이션 정보를 포함한 place 정보',
+  description: '페이지네이션 Place 정보',
 })
-export class PaginatedPlace {
-  @Field(() => PageInfo, { description: '카카오 장소 페이지네이션 정보' })
-  pageInfo: PageInfo;
-
+export class PaginatedPlace extends PageInfo {
   @Field(() => [Place], { description: '카카오 장소 정보들' })
   places: Place[];
 }
