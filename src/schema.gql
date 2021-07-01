@@ -86,6 +86,11 @@ input CreateStickerInput {
   y: Float!
 }
 
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 type DeleteSpotDto {
   """the number of documents deleted. Equal to deletedCount."""
   n: Int!
@@ -126,13 +131,20 @@ input KeywordSearchDto {
   y: Float
 }
 
+type LoginPayload {
+  accessToken: String!
+  user: User!
+}
+
 type Mutation {
   """Sticker를 사용하여 코스를 생성합니다. 이때 코스의 순서는 전달된 스티커들의 순서로 처리됩니다."""
   createCourse(createCourseInput: CreateCourseInput!): Course!
 
   """커스텀 스팟을 생성합니다."""
   createCustomSpot(createCustomSpotInput: CreateCustomSpotInput!): Spot!
+  createSNSUser(createSNSUserInput: createSnsUserInput!): User!
   createSticker(createStickerInput: CreateStickerInput!): Sticker!
+  createUser(createUserInput: createUserInput!): User!
 
   """dummy 데이터를 생성합니다."""
   dummy(keyword: String!): Int!
@@ -231,6 +243,7 @@ type Query {
   spots(searchSpotDto: SearchSpotDto): PaginatedSpot!
   sticker(id: String!): Sticker!
   stickers: [Sticker!]!
+  users: [User!]!
 }
 
 """주어진 x,y 기준으로 근처 spot을 검색합니다."""
@@ -339,4 +352,43 @@ input UpdateStickerInput {
 
   """Sticker가 코스 생성에 사용여부"""
   is_used: Boolean
+}
+
+type User {
+  """user id"""
+  _id: String!
+  createdAt: DateTime!
+  email: String!
+
+  """마케팅 활용 동의여부"""
+  isAcceptTerms: Boolean!
+  nickName: String!
+  password: String!
+  phone: String!
+
+  """소셜 로그인시 받는 ID값"""
+  socialUid: String!
+
+  """회원 탈퇴여부"""
+  status: String!
+  updatedAt: DateTime!
+}
+
+input createSnsUserInput {
+  email: String!
+  nickName: String!
+  phone: String!
+  socialUid: String!
+}
+
+input createUserInput {
+  email: String!
+  nickName: String!
+  password: String!
+  phone: String!
+}
+
+input loginInput {
+  email: String!
+  password: String!
 }
