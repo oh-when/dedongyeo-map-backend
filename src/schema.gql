@@ -172,6 +172,26 @@ type PaginatedPlace {
   total_page_count: Int!
 }
 
+"""페이지네이션 정보를 포함한 spot 정보"""
+type PaginatedSpot {
+  """현재 페이지 번호"""
+  cur_page: Int!
+
+  """현재 페이지가 마지막 페이지인지 여부, 값이 false면 page를 증가시켜 다음 페이지를 요청할 수 있음"""
+  is_end: Boolean!
+
+  """Spot 정보들"""
+  spots: [Spot!]!
+
+  """검색된 문서 수"""
+  total_count: Int!
+
+  """
+  페이지 수(카카오 api가 최대 45개의 문서만 검색 가능하기 때문에 total_count와 매칭되지 않을 수 있다. https://devtalk.kakao.com/t/pageable-count/88418)
+  """
+  total_page_count: Int!
+}
+
 """카카오 지도 api로 부터 받은 위치 정보"""
 type Place {
   address_name: String
@@ -208,7 +228,7 @@ type Query {
   spot(spotId: String!): Spot!
 
   """스팟들을 반환합니다."""
-  spots(searchSpotDto: SearchSpotDto): [Spot!]!
+  spots(searchSpotDto: SearchSpotDto): PaginatedSpot!
   sticker(id: String!): Sticker!
   stickers: [Sticker!]!
 }

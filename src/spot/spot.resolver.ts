@@ -1,30 +1,39 @@
 import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { SpotService } from '../spot/spot.service';
-import { Spot, SpotDocument } from '../spot/entities/spot.entity';
-import { GroupedSticker, Sticker } from '../sticker/entities/sticker.entity';
+import { PaginatedSpot, Spot, SpotDocument } from '../spot/entities/spot.entity';
+import { Sticker } from '../sticker/entities/sticker.entity';
 import { CreateCustomSpotInput } from './dto/create-custom-spot.input';
 import { UpdateCustomSpotInput } from './dto/update-custom-spot.input';
 import { DeleteSpotDto } from '../spot/dto/delete.spot.dto';
 import { SearchNearSpotDto, SearchSpotDto } from './dto/search-spot.dto';
-import { PopulateStickerInput, StickerMode } from './dto/populate-sticker-input';
+import { StickerMode } from './dto/populate-sticker-input';
 import * as mongoose from 'mongoose';
+import { GroupedSticker } from 'src/sticker/dto/grouped-sticker.dto';
 
 @Resolver(() => Spot)
 export class SpotResolver {
   constructor(private readonly spotService: SpotService) {}
 
-  @Query(() => [Spot], {
+  @Query(() => Spot, {
+    name: 'spot',
+    description: '스팟을 반환합니다.',
+  })
+  async findOne(@Args('spotId', { type: () => String }) spotId: mongoose.Types.ObjectId): Promise<Spot> {
+    return await this.spotService.findOne(spotId);
+  }
+
+  @Query(() => PaginatedSpot, {
     name: 'spots',
     description: '스팟들을 반환합니다.',
   })
   async findAll(
     @Args({ name: 'searchSpotDto', nullable: true })
     searchSpotDto: SearchSpotDto,
-  ): Promise<Spot[]> {
+  ): Promise<PaginatedSpot> {
     if ('keyword' in searchSpotDto) {
       return await this.spotService.getByKeyword(searchSpotDto);
     }
-    return await this.spotService.findAll();
+    return await this.spotService.findAll(searchSpotDto);
   }
 
   @Query(() => [Spot], {
@@ -97,9 +106,9 @@ export class SpotResolver {
   })
   async groupStickers(
     @Parent() spot: SpotDocument,
-    @Args({ name: 'PopulateStickerInput', nullable: true })
-    populateStickerInput?: PopulateStickerInput,
+    @Args({ name: 'stickerMode', type: () => StickerMode, nullable: true, defaultValue: StickerMode.group })
+    stickerMode?: StickerMode,
   ) {
-    return await this.spotService.populateStickers(spot._id, populateStickerInput.mode);
+    return await this.spotService.populateStickers(spot._id, stickerMode);
   }
 }

@@ -74,6 +74,6 @@ export class StickerService {
     const stickers: Sticker[] = await this.findAll(stickerIds);
 
     const spotIds: mongoose.Types.ObjectId[] = stickers.map(s => s.spot as mongoose.Types.ObjectId);
-    return this.spotService.findAll(spotIds);
+    return this.spotService.findSpotsByIds(spotIds);
   }
 }

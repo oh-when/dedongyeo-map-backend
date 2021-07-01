@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { SearchService } from '../place/kakaoMapSearch/search.service';
@@ -7,9 +7,9 @@ import { CreateSpotInput } from '../spot/dto/create-spot.input';
 import { CreateCustomSpotInput } from './dto/create-custom-spot.input';
 import { UpdateCustomSpotInput } from './dto/update-custom-spot.input';
 import { SearchNearSpotDto, SearchSpotDto } from '../spot/dto/search-spot.dto';
-import { Spot, SpotDocument } from '../spot/entities/spot.entity';
+import { PaginatedSpot, Spot, SpotDocument } from '../spot/entities/spot.entity';
 import { Place } from '../place/place.entity';
-import { GroupedSticker, Sticker } from '../sticker/entities/sticker.entity';
+import { Sticker } from '../sticker/entities/sticker.entity';
 
 import {
   CustomSpotNotFoundException,
@@ -20,6 +20,8 @@ import {
 } from 'src/shared/exceptions';
 import { StickerMode } from './dto/populate-sticker-input';
 import { DeleteSpotDto } from './dto/delete.spot.dto';
+import { maxPageLimit, PageInfo, PageSearchDto } from 'src/shared/entities/pageinfo.entity';
+import { GroupedSticker } from 'src/sticker/dto/grouped-sticker.dto';
 
 @Injectable()
 export class SpotService {
@@ -30,7 +32,7 @@ export class SpotService {
 
   async findOneOrCreateWithSticker(createSpotInput: CreateSpotInput): Promise<SpotDocument> {
     const place: Place = await this.searchService.getIdenticalPlace(createSpotInput);
-    return await this.spotModel.findOneAndUpdate(
+    return this.spotModel.findOneAndUpdate(
       { place_id: place.id },
       {
         ...place,
@@ -91,10 +93,37 @@ export class SpotService {
   async findOne(_id: mongoose.Types.ObjectId): Promise<SpotDocument> {
     return this.spotModel.findById(_id).exec();
   }
+  async findAll(searchSpotDto: SearchSpotDto): Promise<PaginatedSpot> {
+    const { page: curPage, size: pageSize } = searchSpotDto;
 
-  async findAll(ids: mongoose.Types.ObjectId[] | null = null): Promise<Spot[]> {
-    const filters = ids ? { _id: { $in: ids } } : {};
-    return this.spotModel.find(filters).exec();
+    return this.spotModel
+      .aggregate([
+        {
+          $facet: {
+            metadata: [{ $count: 'total' }],
+            data: [{ $skip: pageSize * (curPage - 1) }, { $limit: pageSize }],
+          },
+        },
+      ])
+      .then((arr: Array<any>) => {
+        const result = arr[0];
+
+        const totalCount = result?.metadata[0].total;
+        const totalPageCount = Math.ceil(totalCount / pageSize);
+        const isEnd = totalPageCount === curPage;
+        const spots: Spot[] = result?.data;
+        return {
+          total_count: totalCount,
+          is_end: isEnd,
+          total_page_count: totalPageCount,
+          cur_page: curPage,
+          spots,
+        };
+      });
+  }
+
+  async findSpotsByIds(ids: mongoose.Types.ObjectId[]): Promise<Spot[]> {
+    return this.spotModel.find({ _id: { $in: ids } }).exec();
   }
 
   async remove(spotId: mongoose.Types.ObjectId): Promise<DeleteSpotDto> {
@@ -115,23 +144,48 @@ export class SpotService {
     return { ok: 0, n: 0 };
   }
 
-  async getByKeyword(searchSpotDto: SearchSpotDto): Promise<Spot[]> {
+  async getByKeyword(searchSpotDto: SearchSpotDto): Promise<PaginatedSpot> {
     /*
     mongodb 한국어 쿼리 참고자료
     - https://ip99202.github.io/posts/nodejs,-mongodb-%EA%B2%8C%EC%8B%9C%ED%8C%90-%EA%B2%80%EC%83%89-%EA%B8%B0%EB%8A%A5/
     - https://github.com/Tekiter/EZSET/blob/master/backend/src/api/v1/simple.route.js
+
+    mongodb pagination reference
+    - https://stackoverflow.com/questions/48305624/how-to-use-mongodb-aggregation-for-pagination
     */
+
     const place_name: RegExp = new RegExp(searchSpotDto.keyword);
+    const { page: curPage, size: pageSize } = searchSpotDto;
     return this.spotModel
-      .find({ place_name })
-      .exec()
-      .catch(err => {
-        throw new SpotNotFoundException(place_name);
+      .aggregate([
+        {
+          $match: { place_name },
+        },
+        {
+          $facet: {
+            metadata: [{ $count: 'total' }],
+            data: [{ $skip: pageSize * (curPage - 1) }, { $limit: pageSize }],
+          },
+        },
+      ])
+      .then((arr: Array<any>) => {
+        const result = arr[0];
+
+        const totalCount = result?.metadata[0].total;
+        const totalPageCount = Math.ceil(totalCount / pageSize);
+        const isEnd = totalPageCount === curPage;
+        const spots: Spot[] = result?.data;
+        return {
+          total_count: totalCount,
+          is_end: isEnd,
+          total_page_count: totalPageCount,
+          cur_page: curPage,
+          spots,
+        };
       });
   }
 
   async getNearSpots(searchSpotDto: SearchNearSpotDto): Promise<Spot[]> {
-    const maxNumSpots: number = 15;
     const maxDistance: number = searchSpotDto.radius;
     const coordinates = [searchSpotDto.x, searchSpotDto.y];
     return this.spotModel
@@ -148,7 +202,7 @@ export class SpotService {
             spherical: true,
           },
         },
-        { $limit: maxNumSpots },
+        { $limit: maxPageLimit },
       ])
       .then(response => response)
       .catch(error => {
@@ -157,7 +211,6 @@ export class SpotService {
   }
 
   async getNearSpotsByKeyword(searchSpotDto: SearchNearSpotDto): Promise<Spot[]> {
-    const maxNumSpots: number = 15;
     const maxDistance: number = searchSpotDto.radius;
     const place_name: RegExp = new RegExp(searchSpotDto.keyword);
     const coordinates = [searchSpotDto.x, searchSpotDto.y];
@@ -176,7 +229,7 @@ export class SpotService {
             spherical: true,
           },
         },
-        { $limit: maxNumSpots },
+        { $limit: maxPageLimit },
       ])
       .then(response => response)
       .catch(error => {
