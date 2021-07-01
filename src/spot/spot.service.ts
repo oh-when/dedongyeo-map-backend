@@ -192,9 +192,9 @@ export class SpotService {
       });
   }
 
-  async getNearSpots(searchSpotDto: SearchNearSpotDto): Promise<Spot[]> {
-    const maxDistance: number = searchSpotDto.radius;
-    const coordinates = [searchSpotDto.x, searchSpotDto.y];
+  async getNearSpots(searchSpotDto: SearchNearSpotDto): Promise<PaginatedSpot> {
+    const { radius: maxDistance, page: curPage, size: pageSize, x, y } = searchSpotDto;
+    const coordinates = [x, y];
     return this.spotModel
       .aggregate([
         {
@@ -209,18 +209,37 @@ export class SpotService {
             spherical: true,
           },
         },
-        { $limit: maxPageLimit },
+        {
+          $facet: {
+            metadata: [{ $count: 'total' }],
+            data: [{ $skip: pageSize * (curPage - 1) }, { $limit: pageSize }],
+          },
+        },
       ])
-      .then(response => response)
+      .then((arr: Array<any>) => {
+        const result = arr[0];
+
+        const totalCount = result?.metadata[0].total;
+        const totalPageCount = Math.ceil(totalCount / pageSize);
+        const isEnd = totalPageCount === curPage;
+        const spots: Spot[] = result?.data;
+        return {
+          total_count: totalCount,
+          is_end: isEnd,
+          total_page_count: totalPageCount,
+          cur_page: curPage,
+          spots,
+        };
+      })
       .catch(error => {
         throw new SpotNoNearException(coordinates);
       });
   }
 
-  async getNearSpotsByKeyword(searchSpotDto: SearchNearSpotDto): Promise<Spot[]> {
-    const maxDistance: number = searchSpotDto.radius;
-    const place_name: RegExp = new RegExp(searchSpotDto.keyword);
-    const coordinates = [searchSpotDto.x, searchSpotDto.y];
+  async getNearSpotsByKeyword(searchSpotDto: SearchNearSpotDto): Promise<PaginatedSpot> {
+    const { radius: maxDistance, page: curPage, size: pageSize, x, y, keyword } = searchSpotDto;
+    const place_name: RegExp = new RegExp(keyword);
+    const coordinates = [x, y];
     return this.spotModel
       .aggregate([
         {
@@ -236,9 +255,28 @@ export class SpotService {
             spherical: true,
           },
         },
-        { $limit: maxPageLimit },
+        {
+          $facet: {
+            metadata: [{ $count: 'total' }],
+            data: [{ $skip: pageSize * (curPage - 1) }, { $limit: pageSize }],
+          },
+        },
       ])
-      .then(response => response)
+      .then((arr: Array<any>) => {
+        const result = arr[0];
+
+        const totalCount = result?.metadata[0].total;
+        const totalPageCount = Math.ceil(totalCount / pageSize);
+        const isEnd = totalPageCount === curPage;
+        const spots: Spot[] = result?.data;
+        return {
+          total_count: totalCount,
+          is_end: isEnd,
+          total_page_count: totalPageCount,
+          cur_page: curPage,
+          spots,
+        };
+      })
       .catch(error => {
         throw new SpotNoNearException(coordinates);
       });
@@ -280,6 +318,10 @@ export class SpotService {
           },
         },
       ])
+      .then(e => {
+        console.log(e);
+        return e;
+      })
       .catch(err => console.log(err));
   }
 

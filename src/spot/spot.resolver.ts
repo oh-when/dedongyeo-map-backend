@@ -36,14 +36,14 @@ export class SpotResolver {
     return await this.spotService.findAll(searchSpotDto);
   }
 
-  @Query(() => [Spot], {
+  @Query(() => PaginatedSpot, {
     name: 'getNearSpots',
     description: '근처에 있는 spot을 검색합니다.',
   })
   async getNearSpots(
     @Args({ name: 'searchSpotDto', nullable: true })
     searchNearSpotDto: SearchNearSpotDto,
-  ): Promise<Spot[]> {
+  ): Promise<PaginatedSpot> {
     if ('keyword' in searchNearSpotDto) {
       return await this.spotService.getNearSpotsByKeyword(searchNearSpotDto);
     }
