@@ -17,12 +17,11 @@ import {
   CustomSpotValidationException,
   SpotDoesNotExistException,
   SpotNoNearException,
-  SpotNotFoundException,
+  StickerDoesNotExistException,
 } from 'src/shared/exceptions';
-import { StickerMode } from './dto/populate-sticker-input';
+
 import { DeleteSpotDto } from './dto/delete.spot.dto';
-import { maxPageLimit, PageInfo, PageSearchDto } from 'src/shared/entities/pageinfo.entity';
-import { GroupedSticker } from 'src/sticker/dto/grouped-sticker.dto';
+import { GroupedDetailSticker, GroupedSticker } from 'src/sticker/dto/grouped-sticker.dto';
 
 @Injectable()
 export class SpotService {
@@ -282,13 +281,30 @@ export class SpotService {
       });
   }
 
-  async populateStickers(spot_id: mongoose.Types.ObjectId, mode: StickerMode | undefined = undefined): Promise<any> {
-    if (mode === StickerMode.group) return this.groupPopulateStickers(spot_id);
-    // if (mode === StickerMode.groupDetail) return this.groupDetailPopulateStickers(spot_id);
-    return this.defaultPopulateStickers(spot_id);
+  async defaultPopulateStickers(spot_id: mongoose.Types.ObjectId): Promise<Sticker[]> {
+    return this.spotModel
+      .aggregate([
+        {
+          $match: { _id: spot_id },
+        },
+        {
+          $lookup: {
+            from: 'stickers',
+            localField: 'stickers',
+            foreignField: '_id',
+            as: 'stickers',
+          },
+        },
+      ])
+      .then(response => {
+        return response[0].stickers;
+      })
+      .catch(err => {
+        throw new StickerDoesNotExistException();
+      });
   }
 
-  async groupPopulateStickers(spot_id: mongoose.Types.ObjectId): Promise<any> {
+  async groupPopulateSticker(spot_id: mongoose.Types.ObjectId): Promise<GroupedSticker> {
     return this.spotModel
       .aggregate([
         {
@@ -318,65 +334,49 @@ export class SpotService {
           },
         },
       ])
-      .then(e => {
-        console.log(e);
-        return e;
+      .then((arr: Array<any>) => {
+        const result = arr[0];
+        const stickerIdx = result?._id?.sticker_index;
+
+        return {
+          sticker_index: stickerIdx,
+          total_count: result.total_count,
+        } as GroupedSticker;
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        throw new StickerDoesNotExistException();
+      });
   }
 
-  // async groupDetailPopulateStickers(spot_id: mongoose.Types.ObjectId): Promise<Sticker[]> {
-  //   return this.spotModel
-  //     .aggregate([
-  //       {
-  //         $match: { _id: spot_id },
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: 'stickers',
-  //           localField: 'stickers',
-  //           foreignField: '_id',
-  //           as: 'stickers',
-  //         },
-  //       },
-  //       {
-  //         $unwind: '$stickers',
-  //       },
-  //       {
-  //         $group: {
-  //           _id: {
-  //             sticker_index: '$stickers.sticker_index',
-  //           },
-  //           total_count: {
-  //             $sum: {
-  //               $const: 1,
-  //             },
-  //           },
-  //         },
-  //       },
-  //     ])
-  //     .then(response => {
-  //       return response[0].stickers;
-  //     });
-  // }
-
-  async defaultPopulateStickers(spot_id: mongoose.Types.ObjectId): Promise<Sticker[]> {
-    return this.spotModel
-      .aggregate([
-        {
-          $match: { _id: spot_id },
+  async groupDetailPopulateStickers(spot_id: mongoose.Types.ObjectId): Promise<GroupedDetailSticker[]> {
+    return await this.spotModel.aggregate([
+      {
+        $match: { _id: spot_id },
+      },
+      {
+        $lookup: {
+          from: 'stickers',
+          localField: 'stickers',
+          foreignField: '_id',
+          as: 'stickers',
         },
-        {
-          $lookup: {
-            from: 'stickers',
-            localField: 'stickers',
-            foreignField: '_id',
-            as: 'stickers',
+      },
+      {
+        $unwind: '$stickers',
+      },
+      {
+        $group: {
+          _id: {
+            sticker_index: '$stickers.sticker_index',
+            sweet_percent: '$stickers.sweet_percent',
+          },
+          total_count: {
+            $sum: {
+              $const: 1,
+            },
           },
         },
-      ])
-      .then(response => {
-        return response[0].stickers;
-      });
+      },
+    ]);
   }
 }

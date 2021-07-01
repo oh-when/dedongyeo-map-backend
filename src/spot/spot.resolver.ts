@@ -1,3 +1,4 @@
+import * as mongoose from 'mongoose';
 import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { SpotService } from '../spot/spot.service';
 import { PaginatedSpot, Spot, SpotDocument } from '../spot/entities/spot.entity';
@@ -6,9 +7,8 @@ import { CreateCustomSpotInput } from './dto/create-custom-spot.input';
 import { UpdateCustomSpotInput } from './dto/update-custom-spot.input';
 import { DeleteSpotDto } from '../spot/dto/delete.spot.dto';
 import { SearchNearSpotDto, SearchSpotDto } from './dto/search-spot.dto';
-import { StickerMode } from './dto/populate-sticker-input';
-import * as mongoose from 'mongoose';
-import { GroupedSticker } from 'src/sticker/dto/grouped-sticker.dto';
+import { GroupedDetailSticker, GroupedSticker } from 'src/sticker/dto/grouped-sticker.dto';
+import { GraphQLList } from 'graphql';
 
 @Resolver(() => Spot)
 export class SpotResolver {
@@ -96,19 +96,25 @@ export class SpotResolver {
     populate?: Boolean,
   ) {
     if (populate) {
-      return await this.spotService.populateStickers(spot._id);
+      return await this.spotService.defaultPopulateStickers(spot._id);
     }
     return spot.stickers;
   }
 
-  @ResolveField(() => [GroupedSticker], {
+  @ResolveField(() => GroupedSticker, {
+    name: 'groupedSticker',
     description: '스티커 index에 따라서 그룹된 정보를 자세히 받아올 수 있습니다.',
   })
-  async groupStickers(
-    @Parent() spot: SpotDocument,
-    @Args({ name: 'stickerMode', type: () => StickerMode, nullable: true, defaultValue: StickerMode.group })
-    stickerMode?: StickerMode,
-  ) {
-    return await this.spotService.populateStickers(spot._id, stickerMode);
+  async groupedSticker(@Parent() spot: SpotDocument) {
+    return await this.spotService.groupPopulateSticker(spot._id);
   }
+
+  // @ResolveField(() => [GroupedDetailSticker]), {
+  //   name: 'groupedDetailSticker',
+
+  //   description: '스티커 index에 따라서 그룹된 정보를 자세히 받아올 수 있습니다.',
+  // })
+  // async groupedDetailSticker(@Parent() spot: SpotDocument) {
+  //   return await this.spotService.groupDetailPopulateStickers(spot._id);
+  // }
 }

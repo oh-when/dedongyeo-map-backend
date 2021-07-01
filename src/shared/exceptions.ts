@@ -37,12 +37,6 @@ export class StickerNotFoundException extends BadRequestException {
   }
 }
 
-export class SpotDoesNotExistException extends BadRequestException {
-  constructor() {
-    super(`Spot Deos Not Exist for that query`);
-  }
-}
-
 export class SpotNotFoundException extends BadRequestException {
   constructor(placeName: RegExp) {
     super(`Spot(place name: ${placeName}) Not Found`);
@@ -76,5 +70,17 @@ export class KakaoApiServerError extends InternalServerErrorException {
 export class SpotNoNearException extends InternalServerErrorException {
   constructor(coordinates: number[]) {
     super(`There are no near spots from ${coordinates}`);
+  }
+}
+
+export class SpotDoesNotExistException extends InternalServerErrorException {
+  constructor() {
+    super(`Spot Deos Not Exist for that query`);
+  }
+}
+
+export class StickerDoesNotExistException extends InternalServerErrorException {
+  constructor() {
+    super(`Sticker Deos Not Exist for that query`);
   }
 }

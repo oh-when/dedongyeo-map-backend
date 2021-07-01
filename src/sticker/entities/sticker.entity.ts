@@ -2,6 +2,7 @@ import { ObjectType, Field, registerEnumType, IntersectionType, Int } from '@nes
 import * as mongoose from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Spot } from '../../spot/entities/spot.entity';
+import { IsIn } from 'class-validator';
 
 @ObjectType({
   description: "'이모지 스티커'로 코스 생성에 기본적으로 사용되는 단위입니다.",
@@ -32,6 +33,7 @@ export class Sticker {
     description: '스티커 당도 퍼센트',
   })
   @Prop({ required: true })
+  @IsIn([0, 30, 50, 70, 100])
   sweet_percent: number;
 
   @Field(() => Boolean, { description: 'Sticker가 코스 생성에 사용여부' })

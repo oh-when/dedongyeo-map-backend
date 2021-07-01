@@ -34,7 +34,6 @@ export class StickerService {
     let spot: SpotDocument = await this.spotService.findOneOrCreateWithSticker(createStickerInput as CreateSpotInput);
     await this.spotService.appendSticker(spot._id, stickerDocument._id);
     stickerDocument.spot = spot._id;
-
     return stickerDocument.save();
   }
 
