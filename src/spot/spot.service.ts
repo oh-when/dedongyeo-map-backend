@@ -15,6 +15,7 @@ import {
   CustomSpotNotFoundException,
   CustomSpotUpdateWhenPublicException,
   CustomSpotValidationException,
+  SpotDoesNotExistException,
   SpotNoNearException,
   SpotNotFoundException,
 } from 'src/shared/exceptions';
@@ -119,6 +120,9 @@ export class SpotService {
           cur_page: curPage,
           spots,
         };
+      })
+      .catch(err => {
+        throw new SpotDoesNotExistException();
       });
   }
 
@@ -182,6 +186,9 @@ export class SpotService {
           cur_page: curPage,
           spots,
         };
+      })
+      .catch(err => {
+        throw new SpotDoesNotExistException();
       });
   }
 

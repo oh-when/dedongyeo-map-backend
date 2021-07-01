@@ -37,6 +37,12 @@ export class StickerNotFoundException extends BadRequestException {
   }
 }
 
+export class SpotDoesNotExistException extends BadRequestException {
+  constructor() {
+    super(`Spot Deos Not Exist for that query`);
+  }
+}
+
 export class SpotNotFoundException extends BadRequestException {
   constructor(placeName: RegExp) {
     super(`Spot(place name: ${placeName}) Not Found`);
