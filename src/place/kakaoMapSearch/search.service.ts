@@ -17,10 +17,7 @@ export class SearchService {
   async searchByKeyword(keywordSearchDto: KeywordSearchDto): Promise<PaginatedPlace> {
     const baseUrl = this.configService.get('app.KAKAO_DEV_HOST');
 
-    const response: {
-      meta: PageInfo;
-      documents: Place[];
-    } = await Axios.get(baseUrl, {
+    const responseData = await Axios.get(baseUrl, {
       headers: {
         Authorization: `KakaoAK ${this.configService.get('app.KAKAO_DEV_REST_API_KEY')}`,
       },
@@ -30,34 +27,35 @@ export class SearchService {
     })
       .then(response => response.data)
       .catch(err => {
-        if (err.response.status == 400) {
+        if (err?.response?.status == 400) {
           throw new PlaceNotFoundException(keywordSearchDto);
         }
         throw new KakaoApiServerError();
       });
 
-    const { total_count, is_end } = response.meta;
+    const { total_count, is_end } = responseData.meta;
     const { size, page } = keywordSearchDto;
-    const pageInfo: PageInfo = this.pageService.getPageInfo(size, page, total_count, is_end);
+    const pageInfo: PageInfo = this.pageService.getPageInfoForKakao(size, page, total_count, is_end);
 
     const paginatedPlace: PaginatedPlace = {
-      pageInfo,
-      places: response.documents,
+      ...pageInfo,
+      places: responseData.documents,
     };
 
     return paginatedPlace;
   }
 
   async getIdenticalPlace(createSpotInput: CreateSpotInput): Promise<Place | null> {
-    return this.searchByKeyword({
+    return await this.searchByKeyword({
       query: createSpotInput.place_name,
       x: createSpotInput.x,
       y: createSpotInput.y,
-      radius: 1,
+      radius: 100,
       sort: SortType.distance,
     })
       .then(({ places }) => places[0])
       .catch(error => {
+        console.log(error);
         throw new PlaceNotFoundIdenticalException(createSpotInput.place_name);
       });
   }

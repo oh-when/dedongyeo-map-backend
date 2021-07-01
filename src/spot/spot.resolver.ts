@@ -1,12 +1,14 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import * as mongoose from 'mongoose';
 import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { SpotService } from '../spot/spot.service';
-import { Spot, SpotDocument } from '../spot/entities/spot.entity';
+import { PaginatedSpot, Spot, SpotDocument } from '../spot/entities/spot.entity';
 import { Sticker } from '../sticker/entities/sticker.entity';
 import { CreateCustomSpotInput } from './dto/create-custom-spot.input';
 import { UpdateCustomSpotInput } from './dto/update-custom-spot.input';
 import { DeleteSpotDto } from '../spot/dto/delete.spot.dto';
-import { SearchSpotDto } from './dto/search-spot.dto';
+import { SearchNearSpotDto, SearchSpotDto } from './dto/search-spot.dto';
+import { GroupedDetailSticker, GroupedSticker } from 'src/sticker/dto/grouped-sticker.dto';
+import { GraphQLList } from 'graphql';
 
 @Resolver(() => Spot)
 export class SpotResolver {
@@ -14,44 +16,46 @@ export class SpotResolver {
 
   @Query(() => Spot, {
     name: 'spot',
-    description: '(For Debugging) 카카오 place id로 스팟 검색',
+    description: '스팟을 반환합니다.',
   })
-  async findOne(@Args('place_id', { type: () => String }) place_id: string) {
-    const result = await this.spotService.findOneByPlaceId(place_id);
-    if (result) {
-      throw new HttpException('There is no spots that matched by kakao id.', HttpStatus.BAD_REQUEST);
-    }
+  async findOne(@Args('spotId', { type: () => String }) spotId: mongoose.Types.ObjectId): Promise<Spot> {
+    return await this.spotService.findOne(spotId);
   }
 
-  @Query(() => [Spot], {
+  @Query(() => PaginatedSpot, {
     name: 'spots',
-    description: 'searchSpotDto에 매칭되는 스팟들을 반환합니다.',
+    description: '스팟들을 반환합니다.',
   })
   async findAll(
     @Args({ name: 'searchSpotDto', nullable: true })
     searchSpotDto: SearchSpotDto,
-  ): Promise<Spot[]> {
-    if (searchSpotDto === undefined) {
-      return await this.spotService.findAll();
-    }
-
+  ): Promise<PaginatedSpot> {
     if ('keyword' in searchSpotDto) {
-      if ('x' in searchSpotDto && 'y' in searchSpotDto) {
-        return await this.spotService.getNearSpotsByKeyword(searchSpotDto);
-      }
-      // x,y가 없을 경우
       return await this.spotService.getByKeyword(searchSpotDto);
     }
+    return await this.spotService.findAll(searchSpotDto);
+  }
 
-    // 키워드가 없을 경우
-    return await this.spotService.getNearSpots(searchSpotDto);
+  @Query(() => PaginatedSpot, {
+    name: 'getNearSpots',
+    description: '근처에 있는 spot을 검색합니다.',
+  })
+  async getNearSpots(
+    @Args({ name: 'searchSpotDto', nullable: true })
+    searchNearSpotDto: SearchNearSpotDto,
+  ): Promise<PaginatedSpot> {
+    if ('keyword' in searchNearSpotDto) {
+      return await this.spotService.getNearSpotsByKeyword(searchNearSpotDto);
+    }
+    return await this.spotService.getNearSpots(searchNearSpotDto);
   }
 
   @Mutation(() => DeleteSpotDto, {
-    description: '(For Debugging) 스팟 하나 삭제',
+    name: 'removeSpot',
+    description: '(For Debugging) 스팟을 삭제합니다',
   })
-  async removeSpot(@Args('id', { type: () => String }) id: string) {
-    return await this.spotService.remove(id);
+  async removeSpot(@Args('spotId', { type: () => String }) spotId: mongoose.Types.ObjectId): Promise<DeleteSpotDto> {
+    return await this.spotService.remove(spotId);
   }
 
   @Mutation(() => Spot, {
@@ -64,24 +68,53 @@ export class SpotResolver {
 
   @Mutation(() => Spot, {
     name: 'updateCustomSpot',
-    description: '커스텀 스팟을 업데이트합니다.',
+    description:
+      '커스텀 스팟을 업데이트합니다. 정책상 is_custom==true && is_custom_share==false && created_by==current_user 때만 삭제 가능',
   })
   async updateCustomSpot(@Args('updateCustomSpotInput') updateCustomSpotInput: UpdateCustomSpotInput): Promise<Spot> {
     const result = await this.spotService.updateCustomSpot(updateCustomSpotInput);
     return result;
   }
 
+  @Mutation(() => DeleteSpotDto, {
+    name: 'removeCustomSpot',
+    description:
+      '커스텀 스팟을 삭제합니다. is_custom==true && is_custom_share==false && created_by==current_user 때만 삭제 가능',
+  })
+  async removeCustomSpot(
+    @Args('spotId', { type: () => String }) spotId: mongoose.Types.ObjectId,
+  ): Promise<DeleteSpotDto> {
+    return await this.spotService.removeCustomSpot(spotId);
+  }
+
   @ResolveField(() => [Sticker], {
-    description: 'populate: true 경우 sticker값을 치환하여 반환합니다.',
+    description: '해당 설정을 통해 스티커들 정보를 자세히 받아올 수 있습니다.',
   })
   async stickers(
     @Parent() spot: SpotDocument,
     @Args({ name: 'populate', nullable: true, defaultValue: false })
-    populate: boolean,
+    populate?: Boolean,
   ) {
     if (populate) {
-      return await this.spotService.populateStickers(spot._id);
+      return await this.spotService.defaultPopulateStickers(spot._id);
     }
     return spot.stickers;
   }
+
+  @ResolveField(() => GroupedSticker, {
+    name: 'groupedSticker',
+    description: '스티커 index에 따라서 그룹된 정보를 자세히 받아올 수 있습니다.',
+  })
+  async groupedSticker(@Parent() spot: SpotDocument) {
+    return await this.spotService.groupPopulateSticker(spot._id);
+  }
+
+  // @ResolveField(() => [GroupedDetailSticker]), {
+  //   name: 'groupedDetailSticker',
+
+  //   description: '스티커 index에 따라서 그룹된 정보를 자세히 받아올 수 있습니다.',
+  // })
+  // async groupedDetailSticker(@Parent() spot: SpotDocument) {
+  //   return await this.spotService.groupDetailPopulateStickers(spot._id);
+  // }
 }

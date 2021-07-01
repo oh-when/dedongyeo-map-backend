@@ -1,15 +1,16 @@
-import { ObjectType, Field, registerEnumType } from "@nestjs/graphql";
-import * as mongoose from "mongoose";
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Spot } from "../../spot/entities/spot.entity";
+import { ObjectType, Field, registerEnumType, IntersectionType, Int } from '@nestjs/graphql';
+import * as mongoose from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Spot } from '../../spot/entities/spot.entity';
+import { IsIn } from 'class-validator';
 
 @ObjectType({
   description: "'이모지 스티커'로 코스 생성에 기본적으로 사용되는 단위입니다.",
 })
 @Schema({ timestamps: true })
 export class Sticker {
-  @Field(() => String, { description: "Sticker id" })
-  _id: mongoose.Types.ObjectId;
+  @Field(() => String, { description: 'Sticker id' })
+  _id?: mongoose.Types.ObjectId;
   // @Field(() => String, {
   //   description: "스티커를 생성한 User",
   // })
@@ -22,27 +23,29 @@ export class Sticker {
   // @Prop({ type: [mongoose.Types.ObjectId], ref: "User" })
   // partners: mongoose.Types.ObjectId[];
 
-  @Field(() => Number, {
-    description: "스티커 번호, 0~11",
+  @Field(() => Int, {
+    description: '스티커 번호, 0~11',
   })
   @Prop({ required: true })
   sticker_index: number;
 
-  @Field(() => Number, {
-    description: "스티커 당도 퍼센트",
+  @Field(() => Int, {
+    description: '스티커 당도 퍼센트',
   })
   @Prop({ required: true })
+  @IsIn([0, 30, 50, 70, 100])
   sweet_percent: number;
 
-  @Field(() => Boolean, { description: "Sticker가 코스 생성에 사용여부" })
+  @Field(() => Boolean, { description: 'Sticker가 코스 생성에 사용여부' })
   @Prop({ default: false })
   is_used?: boolean;
 
   @Field(() => Spot, {
-    description: "스티커가 붙여진 Spot id 또는 Spot 객체값",
+    description: '스티커가 붙여진 Spot id 또는 Spot 객체값',
+    nullable: true,
   })
-  @Prop({ type: mongoose.Types.ObjectId, ref: "Spot" })
-  spot!: mongoose.Types.ObjectId | Spot;
+  @Prop({ type: mongoose.Types.ObjectId, ref: 'Spot' })
+  spot?: mongoose.Types.ObjectId | Spot;
 }
 
 export type StickerDocument = Sticker & mongoose.Document;

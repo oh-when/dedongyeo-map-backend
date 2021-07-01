@@ -1,9 +1,9 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { INestApplication } from "@nestjs/common";
-import * as request from "supertest";
-import { AppModule } from "./../src/app.module";
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import * as request from 'supertest';
+import { AppModule } from './../src/app.module';
 
-describe("Root (e2e)", () => {
+describe('Root (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
@@ -19,10 +19,7 @@ describe("Root (e2e)", () => {
     await app.close();
   });
 
-  it("/ (GET)", () => {
-    return request(app.getHttpServer())
-      .get("/")
-      .expect(200)
-      .expect("Hello 데동여지도 🗺️❤️!");
+  it('/ (GET)', () => {
+    return request(app.getHttpServer()).get('/').expect(200).expect('Hello 데동여지도 🗺️❤️!');
   });
 });

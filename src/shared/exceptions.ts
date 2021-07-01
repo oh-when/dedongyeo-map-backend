@@ -43,6 +43,12 @@ export class SpotNotFoundException extends BadRequestException {
   }
 }
 
+export class CustomSpotNotFoundException extends BadRequestException {
+  constructor(spotId: mongoose.Types.ObjectId) {
+    super(`CustomSpot(id: ${spotId}) Not Found`);
+  }
+}
+
 export class CustomSpotValidationException extends BadRequestException {
   constructor() {
     super(`커스텀 스팟의 "is_custom" field true로 설정되어야 합니다.`);
@@ -64,5 +70,17 @@ export class KakaoApiServerError extends InternalServerErrorException {
 export class SpotNoNearException extends InternalServerErrorException {
   constructor(coordinates: number[]) {
     super(`There are no near spots from ${coordinates}`);
+  }
+}
+
+export class SpotDoesNotExistException extends InternalServerErrorException {
+  constructor() {
+    super(`Spot Deos Not Exist for that query`);
+  }
+}
+
+export class StickerDoesNotExistException extends InternalServerErrorException {
+  constructor() {
+    super(`Sticker Deos Not Exist for that query`);
   }
 }

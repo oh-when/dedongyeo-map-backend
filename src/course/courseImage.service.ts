@@ -52,7 +52,6 @@ export class CourseImageService {
     const prefix: string = 'url-';
     const url = coords
       .map((coord, idx) => {
-        console.log(imageUrls[idx]);
         imageUrl = urlencode(imageUrls[idx]);
         return `${prefix}${imageUrl}(${coord})`;
       })
