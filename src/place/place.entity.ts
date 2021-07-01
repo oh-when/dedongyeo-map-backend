@@ -1,12 +1,12 @@
-import { Field, ObjectType, Float } from "@nestjs/graphql";
-import { PageInfo } from "../shared/entities/pageinfo.entity";
+import { Field, ObjectType, Float, IntersectionType } from '@nestjs/graphql';
+import { PageInfo } from '../shared/entities/pageinfo.entity';
 
 // https://developers.kakao.com/docs/latest/ko/local/dev-guide#search-by-keyword
 @ObjectType({
-  description: "카카오 지도 api로 부터 받은 위치 정보",
+  description: '카카오 지도 api로 부터 받은 위치 정보',
 })
 export class Place {
-  @Field(() => String, { description: "kakao place id" })
+  @Field(() => String, { description: 'kakao place id' })
   id: string;
 
   @Field(() => String)
@@ -36,20 +36,17 @@ export class Place {
   @Field(() => String, { nullable: true })
   distance?: string;
 
-  @Field((type) => Float, { nullable: true })
+  @Field(type => Float, { nullable: true })
   x?: number;
 
-  @Field((type) => Float, { nullable: true })
+  @Field(type => Float, { nullable: true })
   y?: number;
 }
 
 @ObjectType({
-  description: "페이지네이션 정보를 포함한 place 정보",
+  description: '페이지네이션 Place 정보',
 })
-export class PaginatedPlace {
-  @Field(() => PageInfo, { description: "카카오 장소 페이지네이션 정보" })
-  pageInfo: PageInfo;
-
-  @Field(() => [Place], { description: "카카오 장소 정보들" })
+export class PaginatedPlace extends PageInfo {
+  @Field(() => [Place], { description: '카카오 장소 정보들' })
   places: Place[];
 }

@@ -28,13 +28,13 @@ input CourseInput {
 
 input CreateCourseImageInput {
   """이미지 세로 사이즈"""
-  height: Float = 700
+  height: Int = 700
 
   """이미지 테마"""
   theme: ImageThemeType = street
 
   """이미지 가로 사이즈"""
-  width: Float = 700
+  width: Int = 700
 }
 
 input CreateCourseInput {
@@ -78,18 +78,34 @@ input CreateStickerInput {
   road_address_name: String
 
   """스티커 번호, 0~11"""
-  sticker_index: Float!
+  sticker_index: Int!
 
   """스티커 당도 퍼센트"""
-  sweet_percent: Float!
+  sweet_percent: Int!
   x: Float!
   y: Float!
 }
 
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 type DeleteSpotDto {
-  deletedCount: Int!
+  """the number of documents deleted. Equal to deletedCount."""
   n: Int!
+
+  """1 if no errors occurred"""
   ok: Int!
+}
+
+"""스티커 번호(sticker_index)기반으로 그룹화된 스티커 Count 정보"""
+type GroupedSticker {
+  """스티커 번호, 0~11"""
+  sticker_index: Int!
+
+  """그룹에 포함된 스티커 총 갯수"""
+  total_count: Int!
 }
 
 enum ImageThemeType {
@@ -115,47 +131,77 @@ input KeywordSearchDto {
   y: Float
 }
 
+type LoginPayload {
+  accessToken: String!
+  user: User!
+}
+
 type Mutation {
   """Sticker를 사용하여 코스를 생성합니다. 이때 코스의 순서는 전달된 스티커들의 순서로 처리됩니다."""
   createCourse(createCourseInput: CreateCourseInput!): Course!
 
   """커스텀 스팟을 생성합니다."""
   createCustomSpot(createCustomSpotInput: CreateCustomSpotInput!): Spot!
+  createSNSUser(createSNSUserInput: createSnsUserInput!): User!
   createSticker(createStickerInput: CreateStickerInput!): Sticker!
+  createUser(createUserInput: createUserInput!): User!
 
   """dummy 데이터를 생성합니다."""
-  dummy(keyword: String!): Float!
+  dummy(keyword: String!): Int!
 
-  """(For Debugging) 스팟 하나 삭제"""
-  removeSpot(id: String!): DeleteSpotDto!
+  """
+  커스텀 스팟을 삭제합니다. is_custom==true && is_custom_share==false && created_by==current_user 때만 삭제 가능
+  """
+  removeCustomSpot(spotId: String!): DeleteSpotDto!
 
-  """커스텀 스팟을 업데이트합니다."""
+  """(For Debugging) 스팟을 삭제합니다"""
+  removeSpot(spotId: String!): DeleteSpotDto!
+
+  """
+  커스텀 스팟을 업데이트합니다. 정책상 is_custom==true && is_custom_share==false && created_by==current_user 때만 삭제 가능
+  """
   updateCustomSpot(updateCustomSpotInput: UpdateCustomSpotInput!): Spot!
   updateSticker(updateStickerInput: UpdateStickerInput!): Sticker!
 }
 
-"""페이지네이션 정보, """
-type PageInfo {
+"""페이지네이션 Place 정보"""
+type PaginatedPlace {
   """현재 페이지 번호"""
-  cur_page: Float!
+  cur_page: Int!
 
   """현재 페이지가 마지막 페이지인지 여부, 값이 false면 page를 증가시켜 다음 페이지를 요청할 수 있음"""
   is_end: Boolean!
 
-  """총 문서 수"""
-  total_count: Float!
-
-  """노출 가능 페이지 수"""
-  total_page_count: Float!
-}
-
-"""페이지네이션 정보를 포함한 place 정보"""
-type PaginatedPlace {
-  """카카오 장소 페이지네이션 정보"""
-  pageInfo: PageInfo!
-
   """카카오 장소 정보들"""
   places: [Place!]!
+
+  """검색된 문서 수"""
+  total_count: Int!
+
+  """
+  페이지 수(카카오 api가 최대 45개의 문서만 검색 가능하기 때문에 total_count와 매칭되지 않을 수 있다. https://devtalk.kakao.com/t/pageable-count/88418)
+  """
+  total_page_count: Int!
+}
+
+"""페이지네이션 정보를 포함한 spot 정보"""
+type PaginatedSpot {
+  """현재 페이지 번호"""
+  cur_page: Int!
+
+  """현재 페이지가 마지막 페이지인지 여부, 값이 false면 page를 증가시켜 다음 페이지를 요청할 수 있음"""
+  is_end: Boolean!
+
+  """Spot 정보들"""
+  spots: [Spot!]!
+
+  """검색된 문서 수"""
+  total_count: Int!
+
+  """
+  페이지 수(카카오 api가 최대 45개의 문서만 검색 가능하기 때문에 total_count와 매칭되지 않을 수 있다. https://devtalk.kakao.com/t/pageable-count/88418)
+  """
+  total_page_count: Int!
 }
 
 """카카오 지도 api로 부터 받은 위치 정보"""
@@ -181,31 +227,54 @@ type Query {
   course(courseInput: CourseInput!): Course!
   courses: [Course!]!
 
+  """근처에 있는 spot을 검색합니다."""
+  getNearSpots(searchSpotDto: SearchNearSpotDto): PaginatedSpot!
+
   """
   키워드로 위치 정보를 확인합니다. 
   내부적으로 카카오 API를 요청합니다.
   """
-  places(filters: KeywordSearchDto!): PaginatedPlace!
+  places(keywordSearchDto: KeywordSearchDto!): PaginatedPlace!
 
-  """(For Debugging) 카카오 place id로 스팟 검색"""
-  spot(place_id: String!): Spot!
+  """스팟을 반환합니다."""
+  spot(spotId: String!): Spot!
 
-  """searchSpotDto에 매칭되는 스팟들을 반환합니다."""
-  spots(searchSpotDto: SearchSpotDto): [Spot!]!
+  """스팟들을 반환합니다."""
+  spots(searchSpotDto: SearchSpotDto): PaginatedSpot!
   sticker(id: String!): Sticker!
   stickers: [Sticker!]!
+  users: [User!]!
 }
 
-"""스팟 검색으로, 해당 필드가 비워져 있을 경우 db에 저장된 모든 스팟을 반환합니다."""
-input SearchSpotDto {
+"""주어진 x,y 기준으로 근처 spot을 검색합니다."""
+input SearchNearSpotDto {
+  """비워질 경우 x,y 기준으로만 검색됩니다."""
   keyword: String
+
+  """결과 페이지 번호"""
+  page: Int = 1
 
   """
   단위 meter, 0~20000 사이의 값으로 중심 좌표부터의 반경거리. 특정 지역을 중심으로 검색하려고 할 경우 중심좌표로 쓰일 x,y와 함께 사용.
   """
   radius: Int = 1000
+
+  """한 페이지에 보여질 문서의 개수, 1~15 사이의 값"""
+  size: Int = 100
   x: Float
   y: Float
+}
+
+"""키워드 기반으로 spot을 검색합니다. """
+input SearchSpotDto {
+  """비워질 경우 필터링 없이 검색됩니다."""
+  keyword: String
+
+  """결과 페이지 번호"""
+  page: Int = 1
+
+  """한 페이지에 보여질 문서의 개수, 1~15 사이의 값"""
+  size: Int = 100
 }
 
 enum SortType {
@@ -222,6 +291,9 @@ type Spot {
   category_group_name: String
   category_name: String
   distance: String
+
+  """스티커 index에 따라서 그룹된 정보를 자세히 받아올 수 있습니다."""
+  groupedSticker: GroupedSticker!
   is_custom: Boolean
   is_custom_share: Boolean
   phone: String
@@ -232,7 +304,7 @@ type Spot {
   place_url: String
   road_address_name: String
 
-  """list of sticker ids"""
+  """list of stickers"""
   stickers(populate: Boolean = false): [Sticker!]!
   x: Float
   y: Float
@@ -247,13 +319,13 @@ type Sticker {
   is_used: Boolean!
 
   """스티커가 붙여진 Spot id 또는 Spot 객체값"""
-  spot(populate: Boolean!): Spot!
+  spot(populate: Boolean!): Spot
 
   """스티커 번호, 0~11"""
-  sticker_index: Float!
+  sticker_index: Int!
 
   """스티커 당도 퍼센트"""
-  sweet_percent: Float!
+  sweet_percent: Int!
 }
 
 """커스텀 스팟 업데이트 input입니다. is_custom_share이 false일 경우에만 동작합니다."""
@@ -280,4 +352,43 @@ input UpdateStickerInput {
 
   """Sticker가 코스 생성에 사용여부"""
   is_used: Boolean
+}
+
+type User {
+  """user id"""
+  _id: String!
+  createdAt: DateTime!
+  email: String!
+
+  """마케팅 활용 동의여부"""
+  isAcceptTerms: Boolean!
+  nickName: String!
+  password: String!
+  phone: String!
+
+  """소셜 로그인시 받는 ID값"""
+  socialUid: String!
+
+  """회원 탈퇴여부"""
+  status: String!
+  updatedAt: DateTime!
+}
+
+input createSnsUserInput {
+  email: String!
+  nickName: String!
+  phone: String!
+  socialUid: String!
+}
+
+input createUserInput {
+  email: String!
+  nickName: String!
+  password: String!
+  phone: String!
+}
+
+input loginInput {
+  email: String!
+  password: String!
 }

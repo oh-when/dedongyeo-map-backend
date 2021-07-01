@@ -17,6 +17,7 @@ import { StickerModule } from './sticker/sticker.module';
 import { SharedModule } from './shared/shared.module';
 import { AppResolver } from './app.resolver';
 import { ExceptionsLoggerFilter } from './shared/exceptionsLogger.filter';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -28,12 +29,34 @@ import { ExceptionsLoggerFilter } from './shared/exceptionsLogger.filter';
       introspection: true,
       sortSchema: true,
       context: ({ req }) => ({ req }),
-      formatError: (error: GraphQLError): GraphQLFormattedError => {
-        const graphQLFormattedError: GraphQLFormattedError = {
-          message: error.extensions?.exception?.response?.message || error.message,
-        };
+      formatError: (error: GraphQLError) => {
+        if (error.message === 'VALIDATION_ERROR') {
+          const extensions = {
+            code: 'VALIDATION_ERROR',
+            errors: [],
+          };
 
-        return graphQLFormattedError;
+          Object.keys(error.extensions.invalidArgs).forEach(key => {
+            const constraints = [];
+            Object.keys(error.extensions.invalidArgs[key].constraints).forEach(_key => {
+              constraints.push(error.extensions.invalidArgs[key].constraints[_key]);
+            });
+
+            extensions.errors.push({
+              field: error.extensions.invalidArgs[key].property,
+              errors: constraints,
+            });
+          });
+
+          const graphQLFormattedError: GraphQLFormattedError = {
+            message: 'VALIDATION_ERROR',
+            extensions: extensions,
+          };
+
+          return graphQLFormattedError;
+        } else {
+          return error;
+        }
       },
     }),
     MongooseModule.forRootAsync({
@@ -43,6 +66,7 @@ import { ExceptionsLoggerFilter } from './shared/exceptionsLogger.filter';
         return {
           uri: await cfs.getDB(),
           useNewUrlParser: true,
+          // useFindAndModify: false,
         };
       },
       inject: [AppConfigService],
@@ -53,6 +77,7 @@ import { ExceptionsLoggerFilter } from './shared/exceptionsLogger.filter';
     CourseModule,
     UserModule,
     SharedModule,
+    AuthModule,
   ],
   providers: [AppService, AppResolver, { provide: APP_FILTER, useClass: ExceptionsLoggerFilter }],
 })

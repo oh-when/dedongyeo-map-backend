@@ -7,6 +7,5 @@ export class ExceptionsLoggerFilter extends BaseExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost) {
     this.logger.log(`Exception Logger thrown ${exception}`);
-    super.catch(exception, host);
   }
 }
