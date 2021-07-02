@@ -13,9 +13,4 @@ export class CreateCourseInput {
 
   @Field(() => Boolean)
   is_share: boolean;
-
-  // @Field(() => String, {
-  //   description: "스티커를 생성한 User",
-  // })
-  // owner: mongoose.Types.ObjectId;
 }

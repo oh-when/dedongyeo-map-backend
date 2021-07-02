@@ -7,34 +7,21 @@ type Course {
   """Course id"""
   _id: String!
 
-  """course의 image url"""
-  courseImage: String!
+  """데이트 종료 timestamp"""
+  endAt: Timestamp
 
-  """list of sticker ids(순서 중요)"""
-  is_share: Boolean!
+  """코스 공유 여부"""
+  isShare: Boolean
+
+  """동행자 이름 리스트"""
+  partners: [String!]
+
+  """데이트 시작 timestamp"""
+  startAt: Timestamp!
 
   """list of sticker ids(순서 중요)"""
   stickers(populate: Boolean = false): [Sticker!]!
   title: String!
-}
-
-input CourseInput {
-  """코스 id"""
-  courseId: String!
-
-  """course input을 채우면, 이미지 url을 생성하여 전달합니다."""
-  courseImageInput: CreateCourseImageInput
-}
-
-input CreateCourseImageInput {
-  """이미지 세로 사이즈"""
-  height: Int = 700
-
-  """이미지 테마"""
-  theme: ImageThemeType = street
-
-  """이미지 가로 사이즈"""
-  width: Int = 700
 }
 
 input CreateCourseInput {
@@ -106,12 +93,6 @@ type GroupedSticker {
 
   """그룹에 포함된 스티커 총 갯수"""
   total_count: Int!
-}
-
-enum ImageThemeType {
-  dark
-  light
-  street
 }
 
 """SortType은 정확도(accuracy)가 기본이며, 거리순(distance) 정렬을 원할 경우 x,y는 필수 입니다."""
@@ -225,7 +206,7 @@ type Place {
 
 type Query {
   """a Course"""
-  course(courseInput: CourseInput!): Course!
+  course(courseId: String!): Course!
   courses: [Course!]!
 
   """근처에 있는 spot을 검색합니다."""
@@ -328,6 +309,11 @@ type Sticker {
   """스티커 당도 퍼센트"""
   sweet_percent: Int!
 }
+
+"""
+`Date` type as integer. Type represents date and time as number of milliseconds from start of UNIX epoch.
+"""
+scalar Timestamp
 
 """커스텀 스팟 업데이트 input입니다. is_custom_share이 false일 경우에만 동작합니다."""
 input UpdateCustomSpotInput {
