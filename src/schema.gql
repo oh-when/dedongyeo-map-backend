@@ -148,6 +148,7 @@ type Mutation {
 
   """dummy 데이터를 생성합니다."""
   dummy(keyword: String!): Int!
+  login(loginInput: loginInput!): LoginPayload!
 
   """
   커스텀 스팟을 삭제합니다. is_custom==true && is_custom_share==false && created_by==current_user 때만 삭제 가능

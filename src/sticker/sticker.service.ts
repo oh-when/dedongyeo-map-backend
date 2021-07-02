@@ -61,14 +61,6 @@ export class StickerService {
     return this.stickerModel.find(filters).exec();
   }
 
-  async getImageUrls(stickerIds: mongoose.Types.ObjectId[]): Promise<String[]> {
-    const stickers: Sticker[] = await this.findAll(stickerIds);
-    const imageUrls: String[] = stickers.map(s => {
-      return `${this.sweetImgUrl}/${s.sweet_percent}_${s.sticker_index}.png`;
-    });
-    return imageUrls;
-  }
-
   async getAllSpots(stickerIds: mongoose.Types.ObjectId[]): Promise<Spot[]> {
     const stickers: Sticker[] = await this.findAll(stickerIds);
 

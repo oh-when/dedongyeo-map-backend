@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreateCourseImageInput } from './course/dto/create-course-image.input';
 import { KeywordSearchDto } from './place/kakaoMapSearch/search.dto';
 import { SearchService } from './place/kakaoMapSearch/search.service';
 import { Place } from './place/place.entity';

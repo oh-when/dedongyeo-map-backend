@@ -21,13 +21,14 @@ export class Course {
   title: string;
 
   @Field(() => Boolean, {
-    description: 'list of sticker ids(순서 중요)',
+    description: '코스 공유 여부',
   })
   @Prop({ default: false })
   is_share: boolean;
 
-  @Field(() => String, { description: 'course의 image url', defaultValue: '' })
-  courseImage: String;
+  @Field(() => [String], { description: 'list of partners' })
+  @Prop({ type: [String] })
+  partners: [String];
 
   // @Field(() => String, {
   //   description: "스티커를 생성한 User",

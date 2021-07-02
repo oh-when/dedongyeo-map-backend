@@ -29,11 +29,7 @@ export class CourseResolver {
     description: 'a Course',
   })
   async findOne(@Args('courseInput') courseInput: CourseInput): Promise<Course> {
-    const course = await this.courseService.findOne(courseInput.courseId);
-    if (courseInput.courseImageInput) {
-      course.courseImage = await this.courseService.getCourseStaticUrl(course, courseInput.courseImageInput);
-    }
-    return course;
+    return await this.courseService.findOne(courseInput.courseId);
   }
 
   @ResolveField(() => [Sticker], {

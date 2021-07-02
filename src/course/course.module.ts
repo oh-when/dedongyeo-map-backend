@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { CourseService } from './course.service';
-import { CourseImageService } from './courseImage.service';
 import { CourseResolver } from './course.resolver';
 import { MongooseModule } from '@nestjs/mongoose';
 
@@ -19,6 +18,6 @@ import { Spot, SpotSchema } from '../spot/entities/spot.entity';
     MongooseModule.forFeature([{ name: Sticker.name, schema: StickerSchema }]),
     MongooseModule.forFeature([{ name: Spot.name, schema: SpotSchema }]),
   ],
-  providers: [CourseResolver, CourseService, CourseImageService, StickerService, SpotService],
+  providers: [CourseResolver, CourseService, StickerService, SpotService],
 })
 export class CourseModule {}
