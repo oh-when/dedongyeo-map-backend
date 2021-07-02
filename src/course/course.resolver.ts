@@ -1,9 +1,10 @@
+import * as mongoose from 'mongoose';
 import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
 
 import { CourseService } from './course.service';
 import { Course, CourseDocument } from './entities/course.entity';
 import { CreateCourseInput } from './dto/create-course.input';
-import { CourseInput } from './dto/course.input';
+
 import { SpotService } from '../spot/spot.service';
 import { Spot } from '../spot/entities/spot.entity';
 import { Sticker } from '../sticker/entities/sticker.entity';
@@ -28,8 +29,8 @@ export class CourseResolver {
     name: 'course',
     description: 'a Course',
   })
-  async findOne(@Args('courseInput') courseInput: CourseInput): Promise<Course> {
-    return await this.courseService.findOne(courseInput.courseId);
+  async findOne(@Args('courseId', { type: () => String }) courseId: mongoose.Types.ObjectId): Promise<Course> {
+    return await this.courseService.findOne(courseId);
   }
 
   @ResolveField(() => [Sticker], {

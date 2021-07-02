@@ -20,7 +20,7 @@ export class PlaceNotFoundIdenticalException extends BadRequestException {
 }
 
 export class CourseNotFoundException extends BadRequestException {
-  constructor(courseId: String) {
+  constructor(courseId: mongoose.Types.ObjectId) {
     super(`Course(id: ${courseId}) Not Found`);
   }
 }

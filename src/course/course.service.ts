@@ -1,6 +1,6 @@
+import * as mongoose from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
 
 import { Course, CourseDocument } from '../course/entities/course.entity';
 import { CreateCourseInput } from '../course/dto/create-course.input';
@@ -11,7 +11,7 @@ import { CourseNotFoundException } from 'src/shared/exceptions';
 @Injectable()
 export class CourseService {
   constructor(
-    @InjectModel(Course.name) private courseModel: Model<CourseDocument>,
+    @InjectModel(Course.name) private courseModel: mongoose.Model<CourseDocument>,
     private readonly stickerService: StickerService,
   ) {}
 
@@ -22,12 +22,12 @@ export class CourseService {
     const createdCourse = new this.courseModel(createCourseInput);
     return createdCourse.save();
   }
-  async findOne(id: String): Promise<Course> {
+  async findOne(courseId: mongoose.Types.ObjectId): Promise<Course> {
     return this.courseModel
-      .findById(id)
+      .findById(courseId)
       .exec()
       .catch(err => {
-        throw new CourseNotFoundException(id);
+        throw new CourseNotFoundException(courseId);
       });
   }
 
@@ -35,7 +35,7 @@ export class CourseService {
     return this.courseModel.find().exec();
   }
 
-  async populateStickers(courseId: Types.ObjectId): Promise<Sticker[]> {
+  async populateStickers(courseId: mongoose.Types.ObjectId): Promise<Sticker[]> {
     return this.courseModel
       .aggregate([
         {
