@@ -1,4 +1,4 @@
-import { ObjectType, Field, GraphQLTimestamp } from '@nestjs/graphql';
+import { ObjectType, Field, GraphQLTimestamp, ID } from '@nestjs/graphql';
 import * as mongoose from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
@@ -10,18 +10,19 @@ import { PageInfo } from 'src/shared/entities/pageinfo.entity';
 })
 @Schema({ timestamps: true })
 export class Course {
-  @Field(() => String, { description: 'Course id' })
+  @Field(() => ID, { description: 'Course id' })
+  @Prop()
   _id: mongoose.Types.ObjectId;
 
-  @Field(() => [Sticker], { description: 'list of sticker ids(순서 중요)' })
+  @Field(() => [ID], { description: 'list of sticker ids(순서 중요)' })
   @Prop({ type: [mongoose.Types.ObjectId], ref: 'Sticker' })
-  stickers: mongoose.Types.ObjectId[];
+  stickers: [mongoose.Types.ObjectId];
 
-  @Field(() => String)
+  @Field(() => String!)
   @Prop()
   title: string;
 
-  @Field(() => Boolean, {
+  @Field(() => Boolean!, {
     description: '코스 공유 여부',
     nullable: true,
     defaultValue: false,
@@ -33,11 +34,14 @@ export class Course {
   @Prop({ default: [] })
   partners: string[];
 
-  @Field(() => GraphQLTimestamp, { description: '데이트 시작 timestamp' })
+  @Field(() => GraphQLTimestamp!, { description: '데이트 시작 timestamp' })
   @Prop()
   startAt: Date;
 
-  @Field(() => GraphQLTimestamp, { description: '데이트 종료 timestamp', nullable: true, defaultValue: Date.now() })
+  @Field(() => GraphQLTimestamp, {
+    description: '데이트 종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다.',
+    nullable: true,
+  })
   @Prop({ default: Date.now() })
   endAt: Date;
 

@@ -5,9 +5,9 @@
 """스티커(스팟)을 순서대로 저장하고 있는 데이터 코스 정보"""
 type Course {
   """Course id"""
-  _id: String!
+  _id: ID!
 
-  """데이트 종료 timestamp"""
+  """데이트 종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다."""
   endAt: Timestamp
 
   """코스 공유 여부"""
@@ -20,16 +20,26 @@ type Course {
   startAt: Timestamp!
 
   """list of sticker ids(순서 중요)"""
-  stickers(populate: Boolean = false): [Sticker!]!
+  stickers(populate: Boolean = false): [ID!]!
   title: String!
 }
 
 input CreateCourseInput {
-  is_share: Boolean!
+  """데이트 종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다."""
+  endAt: Timestamp
+
+  """코스 공유 여부"""
+  isShare: Boolean = false
+
+  """동행자 이름 리스트"""
+  partners: [String!] = []
+
+  """데이트 시작 timestamp"""
+  startAt: Timestamp
 
   """list of sticker ids(순서 중요)"""
-  stickers: [String!]!
-  title: String!
+  stickers: [ID!]
+  title: String
 }
 
 """커스텀 스팟 생성 input입니다. 테마는 category_group_name로 넣어주세요"""
