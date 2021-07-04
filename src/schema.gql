@@ -218,7 +218,9 @@ type Place {
 type Query {
   """a Course"""
   course(courseId: String!): Course!
-  courses: [Course!]!
+
+  """get Courses"""
+  courses(searchCourseInput: SearchCourseInput): [Course!]!
 
   """근처에 있는 spot을 검색합니다."""
   getNearSpots(searchSpotDto: SearchNearSpotDto): PaginatedSpot!
@@ -237,6 +239,31 @@ type Query {
   sticker(id: String!): Sticker!
   stickers: [Sticker!]!
   users: [User!]!
+}
+
+"""
+
+    1. startAt없을 경우: [,endAt]
+    2. endAt 없을 경우: [startAt,]
+    3. (startAt, endAt)미포함: [,]
+    4. (startAt, endAt) 포함: [startAt, endAt]
+"""
+input SearchCourseInput {
+  """데이트 종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다."""
+  endAt: Timestamp
+
+  """Course id리스트"""
+  ids: [ID!]
+
+  """코스 공유 여부"""
+  isShare: Boolean = false
+
+  """동행자 이름 리스트"""
+  partners: [String!] = []
+
+  """데이트 시작 timestamp"""
+  startAt: Timestamp
+  title: String
 }
 
 """주어진 x,y 기준으로 근처 spot을 검색합니다."""

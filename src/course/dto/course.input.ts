@@ -1,4 +1,4 @@
-import { InputType, PartialType, OmitType, Field, GraphQLTimestamp, ID } from '@nestjs/graphql';
+import { InputType, PartialType, OmitType, Field, GraphQLTimestamp, ID, PickType } from '@nestjs/graphql';
 import * as mongoose from 'mongoose';
 import { Course } from '../entities/course.entity';
 
@@ -38,5 +38,14 @@ export class UpdateCourseInput extends _CourseInput {
   _id: mongoose.Types.ObjectId;
 }
 
-@InputType()
-export class SearchCourseInput extends _CourseInput {}
+@InputType({
+  description: `
+    1. startAt없을 경우: [,endAt]
+    2. endAt 없을 경우: [startAt,]
+    3. (startAt, endAt)미포함: [,]
+    4. (startAt, endAt) 포함: [startAt, endAt]`,
+})
+export class SearchCourseInput extends OmitType(_CourseInput, ['_id', 'stickers'] as const) {
+  @Field(() => [ID], { description: 'Course id리스트', nullable: true })
+  ids?: mongoose.Types.ObjectId[];
+}
