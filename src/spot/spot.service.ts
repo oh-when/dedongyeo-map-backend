@@ -20,8 +20,8 @@ import {
   StickerDoesNotExistException,
 } from 'src/shared/exceptions';
 
-import { DeleteSpotDto } from './dto/delete.spot.dto';
 import { GroupedDetailSticker, GroupedSticker } from 'src/sticker/dto/grouped-sticker.dto';
+import { DeleteQueryDto } from 'src/shared/deleteQuery.dto';
 
 @Injectable()
 export class SpotService {
@@ -129,7 +129,7 @@ export class SpotService {
     return this.spotModel.find({ _id: { $in: ids } }).exec();
   }
 
-  async remove(spotId: mongoose.Types.ObjectId): Promise<DeleteSpotDto> {
+  async remove(spotId: mongoose.Types.ObjectId): Promise<DeleteQueryDto> {
     return this.spotModel.remove({ _id: spotId }).exec();
   }
 
@@ -140,7 +140,7 @@ export class SpotService {
     // TODO: return spot?.is_custom && !spot.is_custom_share && spot.created_by == currentUser;
   }
 
-  async removeCustomSpot(spotId: mongoose.Types.ObjectId): Promise<DeleteSpotDto> {
+  async removeCustomSpot(spotId: mongoose.Types.ObjectId): Promise<DeleteQueryDto> {
     if (await this.validateCustomSpot(spotId)) {
       return this.spotModel.remove({ _id: spotId }).exec();
     }

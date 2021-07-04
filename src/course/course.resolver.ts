@@ -1,11 +1,12 @@
 import * as mongoose from 'mongoose';
-import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ResolveField, Parent, Int, ID } from '@nestjs/graphql';
 
 import { CourseService } from './course.service';
 import { Course, CourseDocument } from './entities/course.entity';
 
 import { Sticker } from '../sticker/entities/sticker.entity';
 import { CreateCourseInput, SearchCourseInput, UpdateCourseInput } from './dto/course.input';
+import { DeleteQueryDto } from 'src/shared/deleteQuery.dto';
 
 @Resolver(() => Course)
 export class CourseResolver {
@@ -38,7 +39,7 @@ export class CourseResolver {
     name: 'course',
     description: 'a Course',
   })
-  async findOne(@Args('courseId', { type: () => String }) courseId: mongoose.Types.ObjectId): Promise<Course> {
+  async findOne(@Args('courseId', { type: () => ID }) courseId: mongoose.Types.ObjectId): Promise<Course> {
     return await this.courseService.findOne(courseId);
   }
 
@@ -57,8 +58,11 @@ export class CourseResolver {
     return course.stickers;
   }
 
-  // @Mutation(() => Course)
-  // removeCourse(@Args('id', { type: () => Int }) id: number) {
-  //   return this.courseService.remove(id);
-  // }
+  @Mutation(() => DeleteQueryDto, {
+    name: 'removeCourse',
+    description: '코스를 삭제합니다.',
+  })
+  async removeCourse(@Args('id', { type: () => ID }) id: mongoose.Types.ObjectId) {
+    return this.courseService.remove(id);
+  }
 }

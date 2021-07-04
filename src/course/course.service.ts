@@ -7,6 +7,7 @@ import { StickerService } from '../sticker/sticker.service';
 import { Sticker } from '../sticker/entities/sticker.entity';
 import { CourseNotFoundException } from 'src/shared/exceptions';
 import { CreateCourseInput, SearchCourseInput, UpdateCourseInput } from './dto/course.input';
+import { DeleteQueryDto } from 'src/shared/deleteQuery.dto';
 
 @Injectable()
 export class CourseService {
@@ -21,9 +22,20 @@ export class CourseService {
   }
 
   async update(updateCourseInput: UpdateCourseInput): Promise<Course> {
+    // TODO: 권한 검증
     const courseID = updateCourseInput._id;
     return this.courseModel
       .findOneAndUpdate({ _id: courseID }, { $set: updateCourseInput }, { new: true })
+      .exec()
+      .catch(err => {
+        throw new CourseNotFoundException(courseID);
+      });
+  }
+
+  async remove(courseID: mongoose.Types.ObjectId): Promise<DeleteQueryDto> {
+    // TODO: 권한 검증
+    return this.courseModel
+      .remove({ _id: courseID })
       .exec()
       .catch(err => {
         throw new CourseNotFoundException(courseID);

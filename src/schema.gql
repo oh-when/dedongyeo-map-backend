@@ -88,7 +88,7 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-type DeleteSpotDto {
+type DeleteQueryDto {
   """the number of documents deleted. Equal to deletedCount."""
   n: Int!
 
@@ -141,13 +141,16 @@ type Mutation {
   dummy(keyword: String!): Int!
   login(loginInput: loginInput!): LoginPayload!
 
+  """코스를 삭제합니다."""
+  removeCourse(id: ID!): DeleteQueryDto!
+
   """
   커스텀 스팟을 삭제합니다. is_custom==true && is_custom_share==false && created_by==current_user 때만 삭제 가능
   """
-  removeCustomSpot(spotId: String!): DeleteSpotDto!
+  removeCustomSpot(spotId: ID!): DeleteQueryDto!
 
   """(For Debugging) 스팟을 삭제합니다"""
-  removeSpot(spotId: String!): DeleteSpotDto!
+  removeSpot(spotId: ID!): DeleteQueryDto!
   updateCourse(updateCourseInput: UpdateCourseInput!): Course!
 
   """
@@ -217,7 +220,7 @@ type Place {
 
 type Query {
   """a Course"""
-  course(courseId: String!): Course!
+  course(courseId: ID!): Course!
 
   """get Courses"""
   courses(searchCourseInput: SearchCourseInput): [Course!]!
@@ -232,11 +235,11 @@ type Query {
   places(keywordSearchDto: KeywordSearchDto!): PaginatedPlace!
 
   """스팟을 반환합니다."""
-  spot(spotId: String!): Spot!
+  spot(spotId: ID!): Spot!
 
   """스팟들을 반환합니다."""
   spots(searchSpotDto: SearchSpotDto): PaginatedSpot!
-  sticker(id: String!): Sticker!
+  sticker(id: ID!): Sticker!
   stickers: [Sticker!]!
   users: [User!]!
 }
