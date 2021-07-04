@@ -20,7 +20,7 @@ export class PlaceNotFoundIdenticalException extends BadRequestException {
 }
 
 export class CourseNotFoundException extends BadRequestException {
-  constructor(courseId: String) {
+  constructor(courseId: mongoose.Types.ObjectId) {
     super(`Course(id: ${courseId}) Not Found`);
   }
 }
@@ -34,6 +34,12 @@ export class MapBoxNoRoutesException extends BadRequestException {
 export class StickerNotFoundException extends BadRequestException {
   constructor(stickerId: mongoose.Types.ObjectId) {
     super(`Sticker(id: ${stickerId}) Not Found`);
+  }
+}
+
+export class StickerAlreadyUsedException extends BadRequestException {
+  constructor(stickerId: mongoose.Types.ObjectId) {
+    super(`Sticker(id: ${stickerId}) is already used`);
   }
 }
 

@@ -1,7 +1,7 @@
 import { ObjectType, Int, Field } from '@nestjs/graphql';
 
 @ObjectType()
-export class DeleteSpotDto {
+export class DeleteQueryDto {
   @Field(type => Int, { description: '1 if no errors occurred' })
   ok: number;
 

@@ -5,43 +5,40 @@
 """스티커(스팟)을 순서대로 저장하고 있는 데이터 코스 정보"""
 type Course {
   """Course id"""
-  _id: String!
+  _id: ID!
 
-  """course의 image url"""
-  courseImage: String!
+  """데이트 종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다."""
+  endAt: Timestamp!
+
+  """코스 공유 여부"""
+  isShare: Boolean!
+
+  """동행자 이름 리스트"""
+  partners: [String!]
+
+  """데이트 시작 timestamp"""
+  startAt: Timestamp!
 
   """list of sticker ids(순서 중요)"""
-  is_share: Boolean!
-
-  """list of sticker ids(순서 중요)"""
-  stickers(populate: Boolean = false): [Sticker!]!
+  stickers(populate: Boolean = false): [ID!]!
   title: String!
 }
 
-input CourseInput {
-  """코스 id"""
-  courseId: String!
-
-  """course input을 채우면, 이미지 url을 생성하여 전달합니다."""
-  courseImageInput: CreateCourseImageInput
-}
-
-input CreateCourseImageInput {
-  """이미지 세로 사이즈"""
-  height: Int = 700
-
-  """이미지 테마"""
-  theme: ImageThemeType = street
-
-  """이미지 가로 사이즈"""
-  width: Int = 700
-}
-
 input CreateCourseInput {
-  is_share: Boolean!
+  """데이트 종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다."""
+  endAt: Timestamp
+
+  """코스 공유 여부"""
+  isShare: Boolean = false
+
+  """동행자 이름 리스트"""
+  partners: [String!] = []
+
+  """데이트 시작 timestamp"""
+  startAt: Timestamp!
 
   """list of sticker ids(순서 중요)"""
-  stickers: [String!]!
+  stickers: [ID!]!
   title: String!
 }
 
@@ -91,7 +88,7 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-type DeleteSpotDto {
+type DeleteQueryDto {
   """the number of documents deleted. Equal to deletedCount."""
   n: Int!
 
@@ -106,12 +103,6 @@ type GroupedSticker {
 
   """그룹에 포함된 스티커 총 갯수"""
   total_count: Int!
-}
-
-enum ImageThemeType {
-  dark
-  light
-  street
 }
 
 """SortType은 정확도(accuracy)가 기본이며, 거리순(distance) 정렬을 원할 경우 x,y는 필수 입니다."""
@@ -148,14 +139,19 @@ type Mutation {
 
   """dummy 데이터를 생성합니다."""
   dummy(keyword: String!): Int!
+  login(loginInput: loginInput!): LoginPayload!
+
+  """코스를 삭제합니다."""
+  removeCourse(id: ID!): DeleteQueryDto!
 
   """
   커스텀 스팟을 삭제합니다. is_custom==true && is_custom_share==false && created_by==current_user 때만 삭제 가능
   """
-  removeCustomSpot(spotId: String!): DeleteSpotDto!
+  removeCustomSpot(spotId: ID!): DeleteQueryDto!
 
   """(For Debugging) 스팟을 삭제합니다"""
-  removeSpot(spotId: String!): DeleteSpotDto!
+  removeSpot(spotId: ID!): DeleteQueryDto!
+  updateCourse(updateCourseInput: UpdateCourseInput!): Course!
 
   """
   커스텀 스팟을 업데이트합니다. 정책상 is_custom==true && is_custom_share==false && created_by==current_user 때만 삭제 가능
@@ -224,8 +220,10 @@ type Place {
 
 type Query {
   """a Course"""
-  course(courseInput: CourseInput!): Course!
-  courses: [Course!]!
+  course(courseId: ID!): Course!
+
+  """get Courses"""
+  courses(searchCourseInput: SearchCourseInput): [Course!]!
 
   """근처에 있는 spot을 검색합니다."""
   getNearSpots(searchSpotDto: SearchNearSpotDto): PaginatedSpot!
@@ -237,13 +235,38 @@ type Query {
   places(keywordSearchDto: KeywordSearchDto!): PaginatedPlace!
 
   """스팟을 반환합니다."""
-  spot(spotId: String!): Spot!
+  spot(spotId: ID!): Spot!
 
   """스팟들을 반환합니다."""
   spots(searchSpotDto: SearchSpotDto): PaginatedSpot!
-  sticker(id: String!): Sticker!
+  sticker(id: ID!): Sticker!
   stickers: [Sticker!]!
   users: [User!]!
+}
+
+"""
+
+    1. startAt없을 경우: [,endAt]
+    2. endAt 없을 경우: [startAt,]
+    3. (startAt, endAt)미포함: [,]
+    4. (startAt, endAt) 포함: [startAt, endAt]
+"""
+input SearchCourseInput {
+  """데이트 종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다."""
+  endAt: Timestamp
+
+  """Course id리스트"""
+  ids: [ID!]
+
+  """코스 공유 여부"""
+  isShare: Boolean = false
+
+  """동행자 이름 리스트"""
+  partners: [String!] = []
+
+  """데이트 시작 timestamp"""
+  startAt: Timestamp
+  title: String
 }
 
 """주어진 x,y 기준으로 근처 spot을 검색합니다."""
@@ -326,6 +349,32 @@ type Sticker {
 
   """스티커 당도 퍼센트"""
   sweet_percent: Int!
+}
+
+"""
+`Date` type as integer. Type represents date and time as number of milliseconds from start of UNIX epoch.
+"""
+scalar Timestamp
+
+input UpdateCourseInput {
+  """Course id"""
+  _id: ID!
+
+  """데이트 종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다."""
+  endAt: Timestamp
+
+  """코스 공유 여부"""
+  isShare: Boolean = false
+
+  """동행자 이름 리스트"""
+  partners: [String!] = []
+
+  """데이트 시작 timestamp"""
+  startAt: Timestamp
+
+  """list of sticker ids(순서 중요)"""
+  stickers: [ID!]
+  title: String
 }
 
 """커스텀 스팟 업데이트 input입니다. is_custom_share이 false일 경우에만 동작합니다."""

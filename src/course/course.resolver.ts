@@ -1,12 +1,12 @@
-import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
+import * as mongoose from 'mongoose';
+import { Resolver, Query, Mutation, Args, ResolveField, Parent, Int, ID } from '@nestjs/graphql';
 
 import { CourseService } from './course.service';
 import { Course, CourseDocument } from './entities/course.entity';
-import { CreateCourseInput } from './dto/create-course.input';
-import { CourseInput } from './dto/course.input';
-import { SpotService } from '../spot/spot.service';
-import { Spot } from '../spot/entities/spot.entity';
+
 import { Sticker } from '../sticker/entities/sticker.entity';
+import { CreateCourseInput, SearchCourseInput, UpdateCourseInput } from './dto/course.input';
+import { DeleteQueryDto } from 'src/shared/deleteQuery.dto';
 
 @Resolver(() => Course)
 export class CourseResolver {
@@ -19,25 +19,33 @@ export class CourseResolver {
     return await this.courseService.create(createCourseInput);
   }
 
-  @Query(() => [Course], { name: 'courses' })
-  async findAll(): Promise<Course[]> {
-    return await this.courseService.findAll();
+  @Mutation(() => Course)
+  async updateCourse(@Args('updateCourseInput') updateCourseInput: UpdateCourseInput) {
+    return await this.courseService.update(updateCourseInput);
+  }
+
+  @Query(() => [Course], { name: 'courses', description: 'get Courses' })
+  async findAll(
+    @Args({ name: 'searchCourseInput', nullable: true }) searchCourseInput: SearchCourseInput,
+  ): Promise<Course[]> {
+    const inputKeys: string[] = Object.keys(searchCourseInput);
+    if (!inputKeys || inputKeys.length === 0) {
+      return await this.courseService.findAll();
+    }
+    return await this.courseService.findCourses(searchCourseInput);
   }
 
   @Query(() => Course, {
     name: 'course',
     description: 'a Course',
   })
-  async findOne(@Args('courseInput') courseInput: CourseInput): Promise<Course> {
-    const course = await this.courseService.findOne(courseInput.courseId);
-    if (courseInput.courseImageInput) {
-      course.courseImage = await this.courseService.getCourseStaticUrl(course, courseInput.courseImageInput);
-    }
-    return course;
+  async findOne(@Args('courseId', { type: () => ID }) courseId: mongoose.Types.ObjectId): Promise<Course> {
+    return await this.courseService.findOne(courseId);
   }
 
   @ResolveField(() => [Sticker], {
-    description: 'populate: true 경우 sticker값을 치환하여 반환합니다.',
+    description:
+      'populate: true 경우 sticker값을 치환하여 반환합니다. populate을 설정하지 않는다면 _id를 반환받을 수 있습니다.',
   })
   async stickers(
     @Parent() course: CourseDocument,
@@ -50,13 +58,11 @@ export class CourseResolver {
     return course.stickers;
   }
 
-  // @Mutation(() => Course)
-  // updateCourse(@Args('updateCourseInput') updateCourseInput: UpdateCourseInput) {
-  //   return this.courseService.update(updateCourseInput.id, updateCourseInput);
-  // }
-
-  // @Mutation(() => Course)
-  // removeCourse(@Args('id', { type: () => Int }) id: number) {
-  //   return this.courseService.remove(id);
-  // }
+  @Mutation(() => DeleteQueryDto, {
+    name: 'removeCourse',
+    description: '코스를 삭제합니다.',
+  })
+  async removeCourse(@Args('id', { type: () => ID }) id: mongoose.Types.ObjectId) {
+    return this.courseService.remove(id);
+  }
 }

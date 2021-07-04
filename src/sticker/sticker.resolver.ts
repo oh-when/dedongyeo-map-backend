@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ResolveField, Parent, ID } from '@nestjs/graphql';
 import * as mongoose from 'mongoose';
 import { StickerService } from './sticker.service';
 import { Sticker, StickerDocument } from './entities/sticker.entity';
@@ -26,7 +26,7 @@ export class StickerResolver {
   }
 
   @Query(() => Sticker, { name: 'sticker' })
-  findOne(@Args('id', { type: () => String }) id: mongoose.Types.ObjectId) {
+  findOne(@Args('id', { type: () => ID }) id: mongoose.Types.ObjectId) {
     return this.stickerService.findOne(id);
   }
 

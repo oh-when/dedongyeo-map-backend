@@ -8,7 +8,7 @@ import { Sticker, StickerDocument } from './entities/sticker.entity';
 import { SpotService } from '../spot/spot.service';
 import { Spot, SpotDocument } from '../spot/entities/spot.entity';
 import { CreateSpotInput } from '../spot/dto/create-spot.input';
-import { StickerNotFoundException } from 'src/shared/exceptions';
+import { StickerAlreadyUsedException, StickerNotFoundException } from 'src/shared/exceptions';
 
 @Injectable()
 export class StickerService {
@@ -47,6 +47,21 @@ export class StickerService {
       });
   }
 
+  async consumeStickers(stickers: mongoose.Types.ObjectId[]): Promise<any> {
+    await this.validateAllStickersNotConsumed(stickers);
+
+    return this.stickerModel
+      .updateMany(
+        {
+          _id: {
+            $in: stickers,
+          },
+        },
+        { $set: { is_used: true } },
+      )
+      .exec();
+  }
+
   async findOne(stickerId: mongoose.Types.ObjectId): Promise<Sticker> {
     return this.stickerModel
       .findById(stickerId)
@@ -61,18 +76,17 @@ export class StickerService {
     return this.stickerModel.find(filters).exec();
   }
 
-  async getImageUrls(stickerIds: mongoose.Types.ObjectId[]): Promise<String[]> {
-    const stickers: Sticker[] = await this.findAll(stickerIds);
-    const imageUrls: String[] = stickers.map(s => {
-      return `${this.sweetImgUrl}/${s.sweet_percent}_${s.sticker_index}.png`;
-    });
-    return imageUrls;
-  }
-
   async getAllSpots(stickerIds: mongoose.Types.ObjectId[]): Promise<Spot[]> {
     const stickers: Sticker[] = await this.findAll(stickerIds);
 
     const spotIds: mongoose.Types.ObjectId[] = stickers.map(s => s.spot as mongoose.Types.ObjectId);
     return this.spotService.findSpotsByIds(spotIds);
+  }
+
+  async validateAllStickersNotConsumed(stickerIDs: mongoose.Types.ObjectId[]): Promise<void> {
+    const stickers: Sticker[] = await this.findAll(stickerIDs);
+    for (let sticker of stickers) {
+      if (sticker.is_used === true) throw new StickerAlreadyUsedException(sticker._id);
+    }
   }
 }

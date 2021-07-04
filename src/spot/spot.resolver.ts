@@ -1,14 +1,15 @@
 import * as mongoose from 'mongoose';
-import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ResolveField, Parent, ID } from '@nestjs/graphql';
 import { SpotService } from '../spot/spot.service';
 import { PaginatedSpot, Spot, SpotDocument } from '../spot/entities/spot.entity';
 import { Sticker } from '../sticker/entities/sticker.entity';
 import { CreateCustomSpotInput } from './dto/create-custom-spot.input';
 import { UpdateCustomSpotInput } from './dto/update-custom-spot.input';
-import { DeleteSpotDto } from '../spot/dto/delete.spot.dto';
+
 import { SearchNearSpotDto, SearchSpotDto } from './dto/search-spot.dto';
-import { GroupedDetailSticker, GroupedSticker } from 'src/sticker/dto/grouped-sticker.dto';
-import { GraphQLList } from 'graphql';
+import { GroupedSticker } from 'src/sticker/dto/grouped-sticker.dto';
+
+import { DeleteQueryDto } from 'src/shared/deleteQuery.dto';
 
 @Resolver(() => Spot)
 export class SpotResolver {
@@ -18,7 +19,7 @@ export class SpotResolver {
     name: 'spot',
     description: '스팟을 반환합니다.',
   })
-  async findOne(@Args('spotId', { type: () => String }) spotId: mongoose.Types.ObjectId): Promise<Spot> {
+  async findOne(@Args('spotId', { type: () => ID }) spotId: mongoose.Types.ObjectId): Promise<Spot> {
     return await this.spotService.findOne(spotId);
   }
 
@@ -50,11 +51,11 @@ export class SpotResolver {
     return await this.spotService.getNearSpots(searchNearSpotDto);
   }
 
-  @Mutation(() => DeleteSpotDto, {
+  @Mutation(() => DeleteQueryDto, {
     name: 'removeSpot',
     description: '(For Debugging) 스팟을 삭제합니다',
   })
-  async removeSpot(@Args('spotId', { type: () => String }) spotId: mongoose.Types.ObjectId): Promise<DeleteSpotDto> {
+  async removeSpot(@Args('spotId', { type: () => ID }) spotId: mongoose.Types.ObjectId): Promise<DeleteQueryDto> {
     return await this.spotService.remove(spotId);
   }
 
@@ -76,14 +77,12 @@ export class SpotResolver {
     return result;
   }
 
-  @Mutation(() => DeleteSpotDto, {
+  @Mutation(() => DeleteQueryDto, {
     name: 'removeCustomSpot',
     description:
       '커스텀 스팟을 삭제합니다. is_custom==true && is_custom_share==false && created_by==current_user 때만 삭제 가능',
   })
-  async removeCustomSpot(
-    @Args('spotId', { type: () => String }) spotId: mongoose.Types.ObjectId,
-  ): Promise<DeleteSpotDto> {
+  async removeCustomSpot(@Args('spotId', { type: () => ID }) spotId: mongoose.Types.ObjectId): Promise<DeleteQueryDto> {
     return await this.spotService.removeCustomSpot(spotId);
   }
 

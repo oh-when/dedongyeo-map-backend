@@ -1,52 +1,74 @@
+import * as mongoose from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
 
 import { Course, CourseDocument } from '../course/entities/course.entity';
-import { CreateCourseInput } from '../course/dto/create-course.input';
-import { CourseImageService } from '../course/courseImage.service';
 import { StickerService } from '../sticker/sticker.service';
 import { Sticker } from '../sticker/entities/sticker.entity';
-import { CreateCourseImageInput } from './dto/create-course-image.input';
 import { CourseNotFoundException } from 'src/shared/exceptions';
+import { CreateCourseInput, SearchCourseInput, UpdateCourseInput } from './dto/course.input';
+import { DeleteQueryDto } from 'src/shared/deleteQuery.dto';
 
 @Injectable()
 export class CourseService {
   constructor(
-    @InjectModel(Course.name) private courseModel: Model<CourseDocument>,
-    private readonly courseImageService: CourseImageService,
+    @InjectModel(Course.name) private courseModel: mongoose.Model<CourseDocument>,
     private readonly stickerService: StickerService,
   ) {}
 
   async create(createCourseInput: CreateCourseInput): Promise<Course> {
-    createCourseInput.stickers.forEach(sticker => {
-      this.stickerService.update({ _id: sticker, is_used: true });
-    });
-    const createdCourse = new this.courseModel(createCourseInput);
-    return createdCourse.save();
+    await this.stickerService.consumeStickers(createCourseInput.stickers);
+    return await this.courseModel.create(createCourseInput);
   }
-  async findOne(id: String): Promise<Course> {
+
+  async update(updateCourseInput: UpdateCourseInput): Promise<Course> {
+    // TODO: 권한 검증
+    const courseID = updateCourseInput._id;
     return this.courseModel
-      .findById(id)
+      .findOneAndUpdate({ _id: courseID }, { $set: updateCourseInput }, { new: true })
       .exec()
       .catch(err => {
-        throw new CourseNotFoundException(id);
+        throw new CourseNotFoundException(courseID);
+      });
+  }
+
+  async remove(courseID: mongoose.Types.ObjectId): Promise<DeleteQueryDto> {
+    // TODO: 권한 검증
+    return this.courseModel
+      .remove({ _id: courseID })
+      .exec()
+      .catch(err => {
+        throw new CourseNotFoundException(courseID);
+      });
+  }
+
+  async findOne(courseId: mongoose.Types.ObjectId): Promise<Course> {
+    return this.courseModel
+      .findById(courseId)
+      .exec()
+      .catch(err => {
+        throw new CourseNotFoundException(courseId);
       });
   }
 
   async findAll(): Promise<Course[]> {
-    return this.courseModel.find().exec();
+    return await this.courseModel.find().exec();
   }
 
-  async getCourseStaticUrl(course: Course, createCourseImageInput: CreateCourseImageInput): Promise<String> {
-    const stickers: Types.ObjectId[] =
-      course.stickers[0] instanceof Sticker
-        ? (course.stickers as Sticker[]).map((s: Sticker) => s._id)
-        : (course.stickers as Types.ObjectId[]);
-    return await this.courseImageService.generate(stickers, createCourseImageInput);
+  async findCourses(searchCourseInput: SearchCourseInput): Promise<Course[]> {
+    const { ids, partners, title, isShare, startAt, endAt } = searchCourseInput;
+    const query = {
+      ...(ids && { _id: { $in: ids } }),
+      ...(partners.length > 0 && { partners: { $in: partners } }),
+      ...(title && { title }),
+      isShare,
+      ...(startAt && { startAt: { $gte: startAt } }),
+      ...(endAt && { endAt: { $lte: endAt } }),
+    };
+    return await this.courseModel.find(query).exec();
   }
 
-  async populateStickers(courseId: Types.ObjectId): Promise<Sticker[]> {
+  async populateStickers(courseId: mongoose.Types.ObjectId): Promise<Sticker[]> {
     return this.courseModel
       .aggregate([
         {

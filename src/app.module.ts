@@ -66,7 +66,7 @@ import { AuthModule } from './auth/auth.module';
         return {
           uri: await cfs.getDB(),
           useNewUrlParser: true,
-          // useFindAndModify: false,
+          useFindAndModify: false,
         };
       },
       inject: [AppConfigService],
