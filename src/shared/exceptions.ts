@@ -37,6 +37,12 @@ export class StickerNotFoundException extends BadRequestException {
   }
 }
 
+export class StickerAlreadyUsedException extends BadRequestException {
+  constructor(stickerId: mongoose.Types.ObjectId) {
+    super(`Sticker(id: ${stickerId}) is already used`);
+  }
+}
+
 export class SpotNotFoundException extends BadRequestException {
   constructor(placeName: RegExp) {
     super(`Spot(place name: ${placeName}) Not Found`);

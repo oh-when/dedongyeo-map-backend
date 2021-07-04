@@ -11,7 +11,6 @@ import { PageInfo } from 'src/shared/entities/pageinfo.entity';
 @Schema({ timestamps: true })
 export class Course {
   @Field(() => ID, { description: 'Course id' })
-  @Prop()
   _id: mongoose.Types.ObjectId;
 
   @Field(() => [ID], { description: 'list of sticker ids(순서 중요)' })
@@ -24,7 +23,6 @@ export class Course {
 
   @Field(() => Boolean!, {
     description: '코스 공유 여부',
-    nullable: true,
     defaultValue: false,
   })
   @Prop({ default: false })
@@ -40,7 +38,6 @@ export class Course {
 
   @Field(() => GraphQLTimestamp, {
     description: '데이트 종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다.',
-    nullable: true,
   })
   @Prop({ default: Date.now() })
   endAt: Date;

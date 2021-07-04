@@ -3,10 +3,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { Course, CourseDocument } from '../course/entities/course.entity';
-import { CreateCourseInput } from '../course/dto/create-course.input';
 import { StickerService } from '../sticker/sticker.service';
 import { Sticker } from '../sticker/entities/sticker.entity';
 import { CourseNotFoundException } from 'src/shared/exceptions';
+import { CreateCourseInput } from './dto/course.input';
 
 @Injectable()
 export class CourseService {
@@ -16,12 +16,10 @@ export class CourseService {
   ) {}
 
   async create(createCourseInput: CreateCourseInput): Promise<Course> {
-    createCourseInput.stickers.forEach(sticker => {
-      this.stickerService.update({ _id: sticker, is_used: true });
-    });
-    const createdCourse = new this.courseModel(createCourseInput);
-    return createdCourse.save();
+    await this.stickerService.consumeStickers(createCourseInput.stickers);
+    return await this.courseModel.create(createCourseInput);
   }
+
   async findOne(courseId: mongoose.Types.ObjectId): Promise<Course> {
     return this.courseModel
       .findById(courseId)

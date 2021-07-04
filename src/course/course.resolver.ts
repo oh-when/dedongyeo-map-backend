@@ -3,11 +3,9 @@ import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/g
 
 import { CourseService } from './course.service';
 import { Course, CourseDocument } from './entities/course.entity';
-import { CreateCourseInput } from './dto/create-course.input';
 
-import { SpotService } from '../spot/spot.service';
-import { Spot } from '../spot/entities/spot.entity';
 import { Sticker } from '../sticker/entities/sticker.entity';
+import { CreateCourseInput } from './dto/course.input';
 
 @Resolver(() => Course)
 export class CourseResolver {
@@ -19,6 +17,11 @@ export class CourseResolver {
   async createCourse(@Args('createCourseInput') createCourseInput: CreateCourseInput): Promise<Course> {
     return await this.courseService.create(createCourseInput);
   }
+
+  // @Mutation(() => Course)
+  // updateCourse(@Args('updateCourseInput') updateCourseInput: UpdateCourseInput) {
+  //   return this.courseService.update(updateCourseInput.id, updateCourseInput);
+  // }
 
   @Query(() => [Course], { name: 'courses' })
   async findAll(): Promise<Course[]> {
@@ -34,7 +37,8 @@ export class CourseResolver {
   }
 
   @ResolveField(() => [Sticker], {
-    description: 'populate: true 경우 sticker값을 치환하여 반환합니다.',
+    description:
+      'populate: true 경우 sticker값을 치환하여 반환합니다. populate을 설정하지 않는다면 _id를 반환받을 수 있습니다.',
   })
   async stickers(
     @Parent() course: CourseDocument,
@@ -46,11 +50,6 @@ export class CourseResolver {
     }
     return course.stickers;
   }
-
-  // @Mutation(() => Course)
-  // updateCourse(@Args('updateCourseInput') updateCourseInput: UpdateCourseInput) {
-  //   return this.courseService.update(updateCourseInput.id, updateCourseInput);
-  // }
 
   // @Mutation(() => Course)
   // removeCourse(@Args('id', { type: () => Int }) id: number) {
