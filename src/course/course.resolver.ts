@@ -5,7 +5,7 @@ import { CourseService } from './course.service';
 import { Course, CourseDocument } from './entities/course.entity';
 
 import { Sticker } from '../sticker/entities/sticker.entity';
-import { CreateCourseInput } from './dto/course.input';
+import { CreateCourseInput, UpdateCourseInput } from './dto/course.input';
 
 @Resolver(() => Course)
 export class CourseResolver {
@@ -18,10 +18,10 @@ export class CourseResolver {
     return await this.courseService.create(createCourseInput);
   }
 
-  // @Mutation(() => Course)
-  // updateCourse(@Args('updateCourseInput') updateCourseInput: UpdateCourseInput) {
-  //   return this.courseService.update(updateCourseInput.id, updateCourseInput);
-  // }
+  @Mutation(() => Course)
+  async updateCourse(@Args('updateCourseInput') updateCourseInput: UpdateCourseInput) {
+    return await this.courseService.update(updateCourseInput);
+  }
 
   @Query(() => [Course], { name: 'courses' })
   async findAll(): Promise<Course[]> {

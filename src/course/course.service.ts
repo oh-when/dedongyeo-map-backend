@@ -6,7 +6,7 @@ import { Course, CourseDocument } from '../course/entities/course.entity';
 import { StickerService } from '../sticker/sticker.service';
 import { Sticker } from '../sticker/entities/sticker.entity';
 import { CourseNotFoundException } from 'src/shared/exceptions';
-import { CreateCourseInput } from './dto/course.input';
+import { CreateCourseInput, UpdateCourseInput } from './dto/course.input';
 
 @Injectable()
 export class CourseService {
@@ -18,6 +18,16 @@ export class CourseService {
   async create(createCourseInput: CreateCourseInput): Promise<Course> {
     await this.stickerService.consumeStickers(createCourseInput.stickers);
     return await this.courseModel.create(createCourseInput);
+  }
+
+  async update(updateCourseInput: UpdateCourseInput): Promise<Course> {
+    const courseID = updateCourseInput._id;
+    return this.courseModel
+      .findOneAndUpdate({ _id: courseID }, { $set: updateCourseInput }, { new: true })
+      .exec()
+      .catch(err => {
+        throw new CourseNotFoundException(courseID);
+      });
   }
 
   async findOne(courseId: mongoose.Types.ObjectId): Promise<Course> {

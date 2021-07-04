@@ -33,4 +33,10 @@ export class CreateCourseInput {
 }
 
 @InputType()
+export class UpdateCourseInput extends _CourseInput {
+  @Field(() => ID, { description: 'Course id' })
+  _id: mongoose.Types.ObjectId;
+}
+
+@InputType()
 export class SearchCourseInput extends _CourseInput {}

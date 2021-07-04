@@ -148,6 +148,7 @@ type Mutation {
 
   """(For Debugging) 스팟을 삭제합니다"""
   removeSpot(spotId: String!): DeleteSpotDto!
+  updateCourse(updateCourseInput: UpdateCourseInput!): Course!
 
   """
   커스텀 스팟을 업데이트합니다. 정책상 is_custom==true && is_custom_share==false && created_by==current_user 때만 삭제 가능
@@ -324,6 +325,27 @@ type Sticker {
 `Date` type as integer. Type represents date and time as number of milliseconds from start of UNIX epoch.
 """
 scalar Timestamp
+
+input UpdateCourseInput {
+  """Course id"""
+  _id: ID!
+
+  """데이트 종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다."""
+  endAt: Timestamp
+
+  """코스 공유 여부"""
+  isShare: Boolean = false
+
+  """동행자 이름 리스트"""
+  partners: [String!] = []
+
+  """데이트 시작 timestamp"""
+  startAt: Timestamp
+
+  """list of sticker ids(순서 중요)"""
+  stickers: [ID!]
+  title: String
+}
 
 """커스텀 스팟 업데이트 input입니다. is_custom_share이 false일 경우에만 동작합니다."""
 input UpdateCustomSpotInput {
