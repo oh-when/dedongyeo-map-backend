@@ -64,8 +64,14 @@ input CreateStickerInput {
   category_name: String
   distance: String
 
+  """종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다."""
+  endAt: Timestamp!
+
   """Sticker가 코스 생성에 사용여부"""
-  is_used: Boolean
+  is_used: Boolean!
+
+  """동행자 이름 리스트"""
+  partners: [String!] = []
   phone: String
 
   """카카오 Place id"""
@@ -73,6 +79,9 @@ input CreateStickerInput {
   place_name: String!
   place_url: String
   road_address_name: String
+
+  """시작 timestamp"""
+  startAt: Timestamp!
 
   """스티커 번호, 0~11"""
   sticker_index: Int!
@@ -338,11 +347,20 @@ type Sticker {
   """Sticker id"""
   _id: String!
 
+  """종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다."""
+  endAt: Timestamp!
+
   """Sticker가 코스 생성에 사용여부"""
   is_used: Boolean!
 
+  """동행자 이름 리스트"""
+  partners: [String!]
+
   """스티커가 붙여진 Spot id 또는 Spot 객체값"""
   spot(populate: Boolean!): Spot
+
+  """시작 timestamp"""
+  startAt: Timestamp!
 
   """스티커 번호, 0~11"""
   sticker_index: Int!

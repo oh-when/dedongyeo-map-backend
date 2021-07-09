@@ -23,13 +23,13 @@ export class CreateCourseInput {
   partners: string[];
 
   @Field(() => GraphQLTimestamp!, { description: '데이트 시작 timestamp' })
-  startAt: Date;
+  startAt: number;
 
   @Field(() => GraphQLTimestamp, {
     description: '데이트 종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다.',
     nullable: true,
   })
-  endAt?: Date;
+  endAt?: number;
 }
 
 @InputType()
