@@ -18,9 +18,12 @@ export class CreateCourseInput {
     defaultValue: false,
   })
   isShare: boolean;
+}
 
-  @Field(() => [String], { description: '동행자 이름 리스트', nullable: true, defaultValue: [] })
-  partners: string[];
+@InputType()
+export class UpdateCourseInput extends CreateCourseInput {
+  @Field(() => ID, { description: 'Course id' })
+  _id: mongoose.Types.ObjectId;
 
   @Field(() => GraphQLTimestamp!, { description: '데이트 시작 timestamp' })
   startAt: Date;
@@ -30,12 +33,9 @@ export class CreateCourseInput {
     nullable: true,
   })
   endAt?: Date;
-}
 
-@InputType()
-export class UpdateCourseInput extends CreateCourseInput {
-  @Field(() => ID, { description: 'Course id' })
-  _id: mongoose.Types.ObjectId;
+  @Field(() => [String], { description: '동행자 이름 리스트', nullable: true, defaultValue: [] })
+  partners: string[];
 }
 
 @InputType({

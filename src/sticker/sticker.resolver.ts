@@ -41,7 +41,10 @@ export class StickerResolver {
   @ResolveField(() => Spot, {
     description: 'populate: true 경우 spot_id를 spot 값으로 치환하여 반환합니다.',
   })
-  async spot(@Parent() sticker: StickerDocument, @Args('populate') populate: boolean) {
+  async spot(
+    @Parent() sticker: StickerDocument,
+    @Args({ name: 'populate', nullable: true, defaultValue: false }) populate?: boolean,
+  ) {
     if (populate) {
       return await this.spotService.findOne(sticker.spot as mongoose.Types.ObjectId);
     }

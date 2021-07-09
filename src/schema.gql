@@ -25,17 +25,8 @@ type Course {
 }
 
 input CreateCourseInput {
-  """데이트 종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다."""
-  endAt: Timestamp
-
   """코스 공유 여부"""
   isShare: Boolean = false
-
-  """동행자 이름 리스트"""
-  partners: [String!] = []
-
-  """데이트 시작 timestamp"""
-  startAt: Timestamp!
 
   """list of sticker ids(순서 중요)"""
   stickers: [ID!]!
@@ -377,7 +368,7 @@ type Sticker {
   partners: [String!]
 
   """스티커가 붙여진 Spot id 또는 Spot 객체값"""
-  spot(populate: Boolean!): Spot
+  spot(populate: Boolean = false): Spot
 
   """시작 timestamp"""
   startAt: Timestamp!
