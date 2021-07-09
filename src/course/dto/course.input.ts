@@ -33,7 +33,7 @@ export class CreateCourseInput {
 }
 
 @InputType()
-export class UpdateCourseInput extends _CourseInput {
+export class UpdateCourseInput extends CreateCourseInput {
   @Field(() => ID, { description: 'Course id' })
   _id: mongoose.Types.ObjectId;
 }

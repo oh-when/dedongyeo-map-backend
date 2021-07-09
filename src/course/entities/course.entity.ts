@@ -13,9 +13,9 @@ export class Course {
   @Field(() => ID, { description: 'Course id' })
   _id: mongoose.Types.ObjectId;
 
-  @Field(() => [ID], { description: 'list of sticker ids(순서 중요)' })
+  @Field(() => [Sticker], { description: 'list of stickers' })
   @Prop({ type: [mongoose.Types.ObjectId], ref: 'Sticker' })
-  stickers: [mongoose.Types.ObjectId];
+  stickers: mongoose.Types.ObjectId[] | Sticker[];
 
   @Field(() => String!)
   @Prop()

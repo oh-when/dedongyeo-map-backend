@@ -50,7 +50,7 @@ export class CourseResolver {
   async stickers(
     @Parent() course: CourseDocument,
     @Args({ name: 'populate', nullable: true, defaultValue: false })
-    populate: boolean,
+    populate?: boolean,
   ) {
     if (populate) {
       return await this.courseService.populateStickers(course._id);

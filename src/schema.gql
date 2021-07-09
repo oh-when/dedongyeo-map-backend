@@ -19,8 +19,8 @@ type Course {
   """데이트 시작 timestamp"""
   startAt: Timestamp!
 
-  """list of sticker ids(순서 중요)"""
-  stickers(populate: Boolean = false): [ID!]!
+  """list of stickers"""
+  stickers(populate: Boolean = false): [Sticker!]!
   title: String!
 }
 
@@ -370,11 +370,11 @@ input UpdateCourseInput {
   partners: [String!] = []
 
   """데이트 시작 timestamp"""
-  startAt: Timestamp
+  startAt: Timestamp!
 
   """list of sticker ids(순서 중요)"""
-  stickers: [ID!]
-  title: String
+  stickers: [ID!]!
+  title: String!
 }
 
 """커스텀 스팟 업데이트 input입니다. is_custom_share이 false일 경우에만 동작합니다."""

@@ -92,7 +92,7 @@ export class SpotResolver {
   async stickers(
     @Parent() spot: SpotDocument,
     @Args({ name: 'populate', nullable: true, defaultValue: false })
-    populate?: Boolean,
+    populate?: boolean,
   ) {
     if (populate) {
       return await this.spotService.defaultPopulateStickers(spot._id);
