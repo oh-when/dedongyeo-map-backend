@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { Course, CourseDocument } from '../course/entities/course.entity';
 import { StickerService } from '../sticker/sticker.service';
-import { Sticker } from '../sticker/entities/sticker.entity';
+import { Sticker, StickerDocument } from '../sticker/entities/sticker.entity';
 import { CourseNotFoundException } from 'src/shared/exceptions';
 import { CreateCourseInput, SearchCourseInput, UpdateCourseInput } from './dto/course.input';
 import { DeleteQueryDto } from 'src/shared/deleteQuery.dto';
@@ -17,8 +17,16 @@ export class CourseService {
   ) {}
 
   async create(createCourseInput: CreateCourseInput): Promise<Course> {
-    await this.stickerService.consumeStickers(createCourseInput.stickers);
-    return await this.courseModel.create(createCourseInput);
+    const stickers: StickerDocument[] = await this.stickerService.findAll(createCourseInput.stickers);
+    await this.stickerService.consumeStickers(stickers);
+
+    const newCreateCourseInput = {
+      startAt: this.stickerService.getMinStartAt(stickers),
+      endAt: this.stickerService.getMaxEndAt(stickers),
+      partners: this.stickerService.gatherPartners(stickers),
+      ...createCourseInput,
+    };
+    return await this.courseModel.create(newCreateCourseInput);
   }
 
   async update(updateCourseInput: UpdateCourseInput): Promise<Course> {

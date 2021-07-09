@@ -22,6 +22,25 @@ export class StickerService {
     this.sweetImgUrl = this.configService.get('app.IMG_SWEET_URL');
   }
 
+  getMinStartAt(stickers: StickerDocument[]): Date {
+    const startDates = stickers.map(sticker => sticker.startAt);
+    const minStartAt = startDates.reduce(function (a, b) {
+      return a < b ? a : b;
+    });
+    return minStartAt;
+  }
+  getMaxEndAt(stickers: StickerDocument[]): Date {
+    const endDates = stickers.map(sticker => sticker.endAt);
+    const minEndAt = endDates.reduce(function (a, b) {
+      return a > b ? a : b;
+    });
+    return minEndAt;
+  }
+  gatherPartners(stickers: StickerDocument[]): Array<String> {
+    const partnerArr = stickers.flatMap(sticker => sticker.partners);
+    return [...new Set(partnerArr)];
+  }
+
   async create(createStickerInput: CreateStickerInput) {
     /**
      * 0. create sticker object
@@ -47,19 +66,9 @@ export class StickerService {
       });
   }
 
-  async consumeStickers(stickers: mongoose.Types.ObjectId[]): Promise<any> {
+  async consumeStickers(stickers: StickerDocument[]): Promise<void> {
     await this.validateAllStickersNotConsumed(stickers);
-
-    return this.stickerModel
-      .updateMany(
-        {
-          _id: {
-            $in: stickers,
-          },
-        },
-        { $set: { is_used: true } },
-      )
-      .exec();
+    stickers.forEach(async sticker => await sticker.update({ $set: { is_used: true } }).exec());
   }
 
   async findOne(stickerId: mongoose.Types.ObjectId): Promise<Sticker> {
@@ -71,7 +80,7 @@ export class StickerService {
       });
   }
 
-  async findAll(ids: mongoose.Types.ObjectId[] | null = null): Promise<Sticker[]> {
+  async findAll(ids: mongoose.Types.ObjectId[] | null = null): Promise<StickerDocument[]> {
     const filters = ids ? { _id: { $in: ids } } : {};
     return this.stickerModel.find(filters).exec();
   }
@@ -93,10 +102,10 @@ export class StickerService {
     return this.spotService.findSpotsByIds(spotIds);
   }
 
-  async validateAllStickersNotConsumed(stickerIDs: mongoose.Types.ObjectId[]): Promise<void> {
-    const stickers: Sticker[] = await this.findAll(stickerIDs);
+  async validateAllStickersNotConsumed(stickers: Sticker[]): Promise<void> {
     for (let sticker of stickers) {
-      if (sticker.is_used === true) throw new StickerAlreadyUsedException(sticker._id);
+      console.log(sticker.is_used);
+      if (sticker.is_used) throw new StickerAlreadyUsedException(sticker._id);
     }
   }
 }

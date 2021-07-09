@@ -368,7 +368,7 @@ type Sticker {
   partners: [String!]
 
   """스티커가 붙여진 Spot id 또는 Spot 객체값"""
-  spot(populate: Boolean!): Spot
+  spot(populate: Boolean = false): Spot
 
   """시작 timestamp"""
   startAt: Timestamp!
