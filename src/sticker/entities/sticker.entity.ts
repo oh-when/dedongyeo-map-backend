@@ -1,8 +1,8 @@
-import { ObjectType, Field, registerEnumType, IntersectionType, Int } from '@nestjs/graphql';
+import { ObjectType, Field, registerEnumType, IntersectionType, Int, GraphQLTimestamp } from '@nestjs/graphql';
 import * as mongoose from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Spot } from '../../spot/entities/spot.entity';
-import { IsIn } from 'class-validator';
+import { IsIn, IsInt, Max, Min } from 'class-validator';
 
 @ObjectType({
   description: "'이모지 스티커'로 코스 생성에 기본적으로 사용되는 단위입니다.",
@@ -27,6 +27,13 @@ export class Sticker {
     description: '스티커 번호, 0~11',
   })
   @Prop({ required: true })
+  @Min(0, {
+    message: 'index는 0부터 시작합니다.',
+  })
+  @Max(11, {
+    message: 'index는 11이 max입니다.',
+  })
+  @IsInt()
   sticker_index: number;
 
   @Field(() => Int, {
@@ -36,7 +43,7 @@ export class Sticker {
   @IsIn([0, 30, 50, 70, 100])
   sweet_percent: number;
 
-  @Field(() => Boolean, { description: 'Sticker가 코스 생성에 사용여부' })
+  @Field(() => Boolean, { description: 'Sticker가 코스 생성에 사용여부', defaultValue: false })
   @Prop({ default: false })
   is_used?: boolean;
 
@@ -46,6 +53,21 @@ export class Sticker {
   })
   @Prop({ type: mongoose.Types.ObjectId, ref: 'Spot' })
   spot?: mongoose.Types.ObjectId | Spot;
+
+  @Field(() => [String], { description: '동행자 이름 리스트', nullable: true, defaultValue: [] })
+  @Prop({ default: [] })
+  partners: string[];
+
+  @Field(() => GraphQLTimestamp!, { description: '시작 timestamp' })
+  @Prop()
+  startAt: Date;
+
+  @Field(() => GraphQLTimestamp, {
+    description: '종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다.',
+    nullable: true,
+  })
+  @Prop({ default: Date.now() })
+  endAt: Date;
 }
 
 export type StickerDocument = Sticker & mongoose.Document;

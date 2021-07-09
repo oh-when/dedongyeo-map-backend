@@ -2,7 +2,7 @@ import { Resolver, Query, Mutation, Args, ResolveField, Parent, ID } from '@nest
 import * as mongoose from 'mongoose';
 import { StickerService } from './sticker.service';
 import { Sticker, StickerDocument } from './entities/sticker.entity';
-import { CreateStickerInput, UpdateStickerInput } from './dto/sticker.input';
+import { CreateStickerInput, SearchStickerInput, UpdateStickerInput } from './dto/sticker.input';
 import { SpotService } from '../spot/spot.service';
 import { Spot } from '../spot/entities/spot.entity';
 
@@ -20,9 +20,17 @@ export class StickerResolver {
     return await this.stickerService.update(updateStickerInput);
   }
 
-  @Query(() => [Sticker], { name: 'stickers' })
-  findAll() {
-    return this.stickerService.findAll();
+  @Query(() => [Sticker], { name: 'stickers', description: 'get Stickers' })
+  async findAll(
+    @Args({ name: 'searchStickerInput', nullable: true }) searchStickerInput: SearchStickerInput,
+  ): Promise<Sticker[]> {
+    const inputKeys: string[] = Object.keys(searchStickerInput);
+    if (!inputKeys || inputKeys.length === 0) {
+      const tmp = await this.stickerService.findAll();
+      console.log(tmp);
+      return tmp;
+    }
+    return await this.stickerService.findStickers(searchStickerInput);
   }
 
   @Query(() => Sticker, { name: 'sticker' })

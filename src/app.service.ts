@@ -38,6 +38,9 @@ export class AppService {
       stickerInput = {
         sticker_index: Math.floor(Math.random() * (11 - 0 + 1)) + 0,
         sweet_percent: choices[Math.floor(Math.random() * choices.length)],
+        partners: ['제민욱', 'leoo.j'],
+        startAt: Date.now() as any,
+        endAt: Date.now() as any,
       };
 
       const createStickerInput: any = {
