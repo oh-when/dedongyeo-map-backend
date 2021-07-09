@@ -3,7 +3,7 @@ import * as mongoose from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { ConfigService } from '@nestjs/config';
 
-import { CreateStickerInput, UpdateStickerInput } from './dto/sticker.input';
+import { CreateStickerInput, SearchStickerInput, UpdateStickerInput } from './dto/sticker.input';
 import { Sticker, StickerDocument } from './entities/sticker.entity';
 import { SpotService } from '../spot/spot.service';
 import { Spot, SpotDocument } from '../spot/entities/spot.entity';
@@ -74,6 +74,16 @@ export class StickerService {
   async findAll(ids: mongoose.Types.ObjectId[] | null = null): Promise<Sticker[]> {
     const filters = ids ? { _id: { $in: ids } } : {};
     return this.stickerModel.find(filters).exec();
+  }
+
+  async findStickers(searchStickerInput: SearchStickerInput): Promise<Sticker[]> {
+    const { is_used, startAt, endAt } = searchStickerInput;
+    const query = {
+      ...(is_used && { is_used }),
+      ...(startAt && { startAt: { $gte: startAt } }),
+      ...(endAt && { endAt: { $lte: endAt } }),
+    };
+    return await this.stickerModel.find(query).exec();
   }
 
   async getAllSpots(stickerIds: mongoose.Types.ObjectId[]): Promise<Spot[]> {

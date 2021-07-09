@@ -65,10 +65,10 @@ input CreateStickerInput {
   distance: String
 
   """종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다."""
-  endAt: Timestamp!
+  endAt: Timestamp
 
   """Sticker가 코스 생성에 사용여부"""
-  is_used: Boolean!
+  is_used: Boolean = false
 
   """동행자 이름 리스트"""
   partners: [String!] = []
@@ -249,7 +249,9 @@ type Query {
   """스팟들을 반환합니다."""
   spots(searchSpotDto: SearchSpotDto): PaginatedSpot!
   sticker(id: ID!): Sticker!
-  stickers: [Sticker!]!
+
+  """get Stickers"""
+  stickers(searchStickerInput: SearchStickerInput): [Sticker!]!
   users: [User!]!
 }
 
@@ -309,6 +311,24 @@ input SearchSpotDto {
   size: Int = 100
 }
 
+"""
+
+    1. startAt없을 경우: [,endAt]
+    2. endAt 없을 경우: [startAt,]
+    3. (startAt, endAt)미포함: [,]
+    4. (startAt, endAt) 포함: [startAt, endAt]
+"""
+input SearchStickerInput {
+  """종료 timestamp, 비워질 경우 Date.now()로 세팅됩니다."""
+  endAt: Timestamp
+
+  """Sticker가 코스 생성에 사용여부"""
+  is_used: Boolean = false
+
+  """시작 timestamp, 비워질 경우 endAt만 검증합니다."""
+  startAt: Timestamp
+}
+
 enum SortType {
   accuracy
   distance
@@ -348,7 +368,7 @@ type Sticker {
   _id: String!
 
   """종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다."""
-  endAt: Timestamp!
+  endAt: Timestamp
 
   """Sticker가 코스 생성에 사용여부"""
   is_used: Boolean!

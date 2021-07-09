@@ -1,6 +1,5 @@
-import { InputType, Field, IntersectionType, Int, PartialType, OmitType } from '@nestjs/graphql';
+import { InputType, Field, IntersectionType, OmitType, GraphQLTimestamp } from '@nestjs/graphql';
 import * as mongoose from 'mongoose';
-import { Min, Max, IsInt, IsIn } from 'class-validator';
 import { CreateSpotInput } from '../../spot/dto/create-spot.input';
 import { Sticker } from '../entities/sticker.entity';
 
@@ -20,4 +19,25 @@ export class UpdateStickerInput {
     nullable: true,
   })
   is_used: boolean;
+}
+
+@InputType({
+  description: `
+    1. startAt없을 경우: [,endAt]
+    2. endAt 없을 경우: [startAt,]
+    3. (startAt, endAt)미포함: [,]
+    4. (startAt, endAt) 포함: [startAt, endAt]`,
+})
+export class SearchStickerInput {
+  @Field(() => Boolean, { description: 'Sticker가 코스 생성에 사용여부', defaultValue: false })
+  is_used?: boolean;
+
+  @Field(() => GraphQLTimestamp!, { description: '시작 timestamp, 비워질 경우 endAt만 검증합니다.', nullable: true })
+  startAt?: Date;
+
+  @Field(() => GraphQLTimestamp, {
+    description: '종료 timestamp, 비워질 경우 Date.now()로 세팅됩니다.',
+    nullable: true,
+  })
+  endAt?: Date;
 }

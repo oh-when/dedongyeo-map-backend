@@ -43,7 +43,7 @@ export class Sticker {
   @IsIn([0, 30, 50, 70, 100])
   sweet_percent: number;
 
-  @Field(() => Boolean, { description: 'Sticker가 코스 생성에 사용여부' })
+  @Field(() => Boolean, { description: 'Sticker가 코스 생성에 사용여부', defaultValue: false })
   @Prop({ default: false })
   is_used?: boolean;
 
@@ -60,13 +60,14 @@ export class Sticker {
 
   @Field(() => GraphQLTimestamp!, { description: '시작 timestamp' })
   @Prop()
-  startAt: number;
+  startAt: Date;
 
   @Field(() => GraphQLTimestamp, {
     description: '종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다.',
+    nullable: true,
   })
   @Prop({ default: Date.now() })
-  endAt: number;
+  endAt: Date;
 }
 
 export type StickerDocument = Sticker & mongoose.Document;

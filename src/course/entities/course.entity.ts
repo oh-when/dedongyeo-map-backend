@@ -34,13 +34,13 @@ export class Course {
 
   @Field(() => GraphQLTimestamp!, { description: '데이트 시작 timestamp' })
   @Prop()
-  startAt: number;
+  startAt: Date;
 
   @Field(() => GraphQLTimestamp, {
     description: '데이트 종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다.',
   })
   @Prop({ default: Date.now() })
-  endAt: number;
+  endAt: Date;
 
   // @Field(() => String, {
   //   description: "스티커를 생성한 User",
