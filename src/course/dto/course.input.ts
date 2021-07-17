@@ -21,21 +21,21 @@ export class CreateCourseInput {
 }
 
 @InputType()
-export class UpdateCourseInput extends CreateCourseInput {
-  @Field(() => ID, { description: 'Course id' })
-  _id: mongoose.Types.ObjectId;
+export class UpdateCourseInput extends PartialType(CreateCourseInput) {
+  @Field(() => ID!, { description: 'Course id' })
+  _id!: mongoose.Types.ObjectId;
 
-  @Field(() => GraphQLTimestamp!, { description: '데이트 시작 timestamp' })
-  startAt: Date;
+  @Field(() => GraphQLTimestamp, { description: '데이트 시작 timestamp', nullable: true })
+  startAt?: Date;
 
   @Field(() => GraphQLTimestamp, {
-    description: '데이트 종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다.',
+    description: '데이트 종료 timestamp',
     nullable: true,
   })
   endAt?: Date;
 
-  @Field(() => [String], { description: '동행자 이름 리스트', nullable: true, defaultValue: [] })
-  partners: string[];
+  @Field(() => [String], { description: '동행자 이름 리스트', nullable: true })
+  partners?: string[];
 }
 
 @InputType({
