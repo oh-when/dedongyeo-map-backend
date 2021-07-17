@@ -45,7 +45,13 @@ export class UpdateCourseInput extends CreateCourseInput {
     3. (startAt, endAt)미포함: [,]
     4. (startAt, endAt) 포함: [startAt, endAt]`,
 })
-export class SearchCourseInput extends OmitType(_CourseInput, ['_id', 'stickers'] as const) {
+export class SearchCourseInput extends OmitType(_CourseInput, ['_id', 'stickers', 'isShare'] as const) {
   @Field(() => [ID], { description: 'Course id리스트', nullable: true })
   ids?: mongoose.Types.ObjectId[];
+
+  @Field(() => Boolean, {
+    description: '코스 공유 여부',
+    nullable: true,
+  })
+  isShare?: boolean;
 }

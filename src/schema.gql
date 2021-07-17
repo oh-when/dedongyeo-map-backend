@@ -261,7 +261,7 @@ input SearchCourseInput {
   ids: [ID!]
 
   """코스 공유 여부"""
-  isShare: Boolean = false
+  isShare: Boolean
 
   """동행자 이름 리스트"""
   partners: [String!] = []
@@ -389,21 +389,21 @@ input UpdateCourseInput {
   """Course id"""
   _id: ID!
 
-  """데이트 종료 timestamp, 비워질 경우 Date.now으로 세팅됩니다."""
+  """데이트 종료 timestamp"""
   endAt: Timestamp
 
   """코스 공유 여부"""
   isShare: Boolean = false
 
   """동행자 이름 리스트"""
-  partners: [String!] = []
+  partners: [String!]
 
   """데이트 시작 timestamp"""
-  startAt: Timestamp!
+  startAt: Timestamp
 
   """list of sticker ids(순서 중요)"""
-  stickers: [ID!]!
-  title: String!
+  stickers: [ID!]
+  title: String
 }
 
 """커스텀 스팟 업데이트 input입니다. is_custom_share이 false일 경우에만 동작합니다."""

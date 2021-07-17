@@ -69,7 +69,7 @@ export class CourseService {
       ...(ids && { _id: { $in: ids } }),
       ...(partners.length > 0 && { partners: { $in: partners } }),
       ...(title && { title }),
-      isShare,
+      ...(isShare && { isShare }),
       ...(startAt && { startAt: { $gte: startAt } }),
       ...(endAt && { endAt: { $lte: endAt } }),
     };
