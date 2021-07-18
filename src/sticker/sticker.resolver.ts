@@ -5,6 +5,7 @@ import { Sticker, StickerDocument } from './entities/sticker.entity';
 import { CreateStickerInput, SearchStickerInput, UpdateStickerInput } from './dto/sticker.input';
 import { SpotService } from '../spot/spot.service';
 import { Spot } from '../spot/entities/spot.entity';
+import { DeleteQueryDto } from 'src/shared/deleteQuery.dto';
 
 @Resolver(() => Sticker)
 export class StickerResolver {
@@ -26,9 +27,7 @@ export class StickerResolver {
   ): Promise<Sticker[]> {
     const inputKeys: string[] = Object.keys(searchStickerInput);
     if (!inputKeys || inputKeys.length === 0) {
-      const tmp = await this.stickerService.findAll();
-      console.log(tmp);
-      return tmp;
+      return await this.stickerService.findAll();
     }
     return await this.stickerService.findStickers(searchStickerInput);
   }
@@ -36,6 +35,14 @@ export class StickerResolver {
   @Query(() => Sticker, { name: 'sticker' })
   findOne(@Args('id', { type: () => ID }) id: mongoose.Types.ObjectId) {
     return this.stickerService.findOne(id);
+  }
+
+  @Mutation(() => DeleteQueryDto, {
+    name: 'removeSticker',
+    description: '(dev)스티커를 삭제합니다.',
+  })
+  async removeSticker(@Args('id', { type: () => ID }) id: mongoose.Types.ObjectId) {
+    return this.stickerService.remove(id);
   }
 
   @ResolveField(() => Spot, {
