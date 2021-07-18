@@ -9,6 +9,7 @@ import { SpotService } from '../spot/spot.service';
 import { Spot, SpotDocument } from '../spot/entities/spot.entity';
 import { CreateSpotInput } from '../spot/dto/create-spot.input';
 import { StickerAlreadyUsedException, StickerNotFoundException } from 'src/shared/exceptions';
+import { DeleteQueryDto } from 'src/shared/deleteQuery.dto';
 
 @Injectable()
 export class StickerService {
@@ -107,5 +108,15 @@ export class StickerService {
       console.log(sticker.is_used);
       if (sticker.is_used) throw new StickerAlreadyUsedException(sticker._id);
     }
+  }
+
+  async remove(stickerID: mongoose.Types.ObjectId): Promise<DeleteQueryDto> {
+    // TODO: 권한 검증
+    return this.stickerModel
+      .remove({ _id: stickerID })
+      .exec()
+      .catch(err => {
+        throw new StickerNotFoundException(stickerID);
+      });
   }
 }

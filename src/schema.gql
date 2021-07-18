@@ -151,6 +151,9 @@ type Mutation {
 
   """(For Debugging) 스팟을 삭제합니다"""
   removeSpot(spotId: ID!): DeleteQueryDto!
+
+  """(dev)스티커를 삭제합니다."""
+  removeSticker(id: ID!): DeleteQueryDto!
   updateCourse(updateCourseInput: UpdateCourseInput!): Course!
 
   """
